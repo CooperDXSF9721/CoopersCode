@@ -1,1 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cooper Ross — Personal Profile</title>
+  <style>
+    :root{
+      --bg: #f5f9ff;
+      --card: #d9f0ff; /* light blue */
+      --accent: #8cc8ff;
+      --radius: 14px;
+      --maxw: 980px;
+      --glass-shadow: 0 6px 18px rgba(20,40,70,0.08);
+      --text: #123;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    body{background:var(--bg); color:var(--text); margin:0; padding:24px; display:flex; justify-content:center}
+    .site{width:100%; max-width:var(--maxw)}
 
+    /* Header */
+    .header{display:flex; align-items:center; gap:18px; margin-bottom:20px}
+    .avatar-wrap{flex:0 0 auto}
+    .avatar{width:110px; height:110px; border-radius:18px; overflow:hidden; box-shadow:var(--glass-shadow); border:4px solid white; display:block}
+    .avatar img{width:100%; height:100%; object-fit:cover; display:block}
+    .title{flex:1}
+    .title h1{margin:0; font-size:24px}
+    .subtitle{margin-top:6px; color:#2b567a; font-weight:600}
+
+    /* Grid of cards */
+    .grid{display:grid; grid-template-columns: repeat(2, 1fr); gap:18px}
+    @media (max-width:740px){.grid{grid-template-columns:1fr}}
+
+    .card{background:linear-gradient(180deg,var(--card), #e6f7ff); padding:18px; border-radius:var(--radius); box-shadow:var(--glass-shadow); border:1px solid rgba(15,60,120,0.04)}
+    .card h2{margin:0 0 10px 0; font-size:18px; color:#0b3a5a}
+    .card p{margin:0; line-height:1.45}
+
+    /* Extra small full width card for footer or schedule if needed */
+    .full{grid-column:1 / -1}
+
+    /* small helpers */
+    .muted{color:#234; opacity:0.8}
+    .note{font-size:13px; margin-top:8px; color:#18405f}
+
+    /* subtle footer */
+    .footer{margin-top:22px; text-align:center; color:#345; opacity:0.8; font-size:13px}
+
+    /* Nice little focus for accessibility */
+    a:focus, button:focus{outline:3px solid rgba(140,200,255,0.45); outline-offset:2px}
+  </style>
+</head>
+<body>
+  <!--
+    How to use this file:
+    1) Replace `images/profile.jpg` with your picture. Create an `images/` folder next to this file.
+    2) Edit the card text below if you want changes.
+    3) To host on GitHub Pages: create a repository, add this file named `index.html`, push to `main`, then in Settings > Pages enable Pages from the `main` branch root. Your site will be at `https://<your-username>.github.io/<repo>/`.
+  -->
+
+  <main class="site">
+    <header class="header">
+      <div class="avatar-wrap">
+        <!-- Replace the image at images/profile.jpg with your profile picture -->
+        <a class="avatar" href="#">
+          <img src="images/profile.jpg" alt="Cooper Ross — profile picture" />
+        </a>
+      </div>
+      <div class="title">
+        <h1>Cooper Ross</h1>
+        <div class="subtitle">Personal Profile</div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <h2>About Me</h2>
+        <p>My name is Cooper Ross. I'm currently 12 years old and my birthday is on May 13, 2013. I love squash and playing video games with my brother. I have five pets including two dogs, two cats, and a guinnea pig. I have three siblings,  a brother named Bennett who is nineteen years old, a sister who is seventeen years old named Maddeline but we call her Maddie. I also have another sister who's name is Ella and she's sixteen.</p>
+      </article>
+
+      <article class="card">
+        <h2>My Schedule</h2>
+        <p class="muted">(Add your weekly schedule here — school, practice times, or routine.)</p>
+        <p class="note">Example: Mon & Wed — Squash practice 4:30–6:00pm; Sat — Family time; Sun — Robotics club.</p>
+      </article>
+
+      <article class="card">
+        <h2>My Interests</h2>
+        <p>One thing i'm interested in is squash. Some other things are soccer, robotics, video games, and puzzles.</p>
+      </article>
+
+      <article class="card">
+        <h2>Sports</h2>
+        <p class="muted">(Add your sports highlights, teams, or achievements here.)</p>
+        <p class="note">Example: Squash — Club team, practicing since age 9; Soccer — plays recreationally.</p>
+      </article>
+
+      <!-- Example of a full-width section if you'd like to add more content later -->
+      <!-- <article class="card full">
+        <h2>Projects / Photos</h2>
+        <p>Use this space to show off projects, photos, or links to social profiles.</p>
+      </article> -->
+    </section>
+
+    <div class="footer">Made with ♥ — edit this file to personalize. Remember to replace <code>images/profile.jpg</code> with your photo.</div>
+  </main>
+</body>
+</html>
