@@ -37,6 +37,7 @@ let currentLevel = 0;
 let player = {x: 50, y: 300, width: 30, height: 30, dx: 0, dy: 0, onGround:false};
 const keys = {left:false,right:false,up:false};
 
+// Keyboard input
 document.addEventListener('keydown', e=>{
   if(e.key==='a' || e.key==='ArrowLeft') keys.left=true;
   if(e.key==='d' || e.key==='ArrowRight') keys.right=true;
@@ -52,35 +53,38 @@ function gameLoop(){
   const level = levels[currentLevel];
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // gravity
+  // Gravity
   player.dy += 0.5;
   player.onGround = false;
 
-  // horizontal movement
+  // Horizontal movement
   if(keys.left) player.dx = -3;
   else if(keys.right) player.dx = 3;
   else player.dx = 0;
 
-  // jumping
-  if(keys.up && player.onGround) {
+  // Jumping
+  if(keys.up && player.onGround){
     player.dy = -10;
+    player.onGround = false;
   }
 
   player.x += player.dx;
   player.y += player.dy;
 
-  // collisions with platforms
+  // Collisions with platforms (fixed jump)
   level.platforms.forEach(p=>{
-    if(player.x + player.width > p.x && player.x < p.x + p.width &&
-       player.y + player.height > p.y && player.y + player.height < p.y + p.height + 10 &&
-       player.dy >=0){
+    if(player.dy >=0 &&
+       player.x + player.width > p.x &&
+       player.x < p.x + p.width &&
+       player.y + player.height >= p.y &&
+       player.y + player.height <= p.y + 20){ // increased tolerance
       player.y = p.y - player.height;
       player.dy = 0;
       player.onGround = true;
     }
   });
 
-  // collisions with hazards
+  // Collisions with hazards
   let dead = false;
   level.hazards.forEach(h=>{
     if(player.x + player.width > h.x && player.x < h.x + h.width &&
@@ -95,14 +99,14 @@ function gameLoop(){
     player.dy=0;
   }
 
-  // check finish
+  // Check finish
   const f = level.finish;
   if(player.x + player.width > f.x && player.x < f.x + f.width &&
      player.y + player.height > f.y && player.y < f.y + f.height){
     currentLevel++;
-    if(currentLevel>=levels.length){
+    if(currentLevel >= levels.length){
       alert('You Win All Levels!');
-      currentLevel=0;
+      currentLevel = 0;
     }
     player.x = 50;
     player.y = 300;
@@ -110,19 +114,19 @@ function gameLoop(){
     player.dy=0;
   }
 
-  // draw platforms
+  // Draw platforms
   ctx.fillStyle = 'green';
   level.platforms.forEach(p=> ctx.fillRect(p.x,p.y,p.width,p.height));
 
-  // draw hazards
+  // Draw hazards
   ctx.fillStyle = 'red';
   level.hazards.forEach(h=> ctx.fillRect(h.x,h.y,h.width,h.height));
 
-  // draw finish
+  // Draw finish
   ctx.fillStyle = 'gold';
   ctx.fillRect(f.x,f.y,f.width,f.height);
 
-  // draw player
+  // Draw player
   ctx.fillStyle = 'blue';
   ctx.fillRect(player.x,player.y,player.width,player.height);
 
