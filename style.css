@@ -1,0 +1,33 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f8ff;
+  margin: 0;
+  padding: 20px;
+}
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.profile-pic {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 20px;
+}
+h1 {
+  margin: 0;
+}
+.section {
+  background: #d0e8ff;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+canvas {
+  display: block;
+  margin: auto;
+  border: 2px solid #000;
+  background: #e0f7ff;
+}
