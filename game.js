@@ -1,37 +1,37 @@
-// Platformer Game Script
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-const FLOOR_Y = canvas.height - 40; // floor height for lava
+const FLOOR_Y = canvas.height - 40; // lava height
 
-let levels = [
+// Levels with clean, intentional platform paths
+const levels = [
   {
+    // Level 1: simple, clear path
     platforms: [
-      {x: 50,  y: 350, width: 100, height: 10},  // start left
-      {x: 400, y: 310, width: 100, height: 10},  // far right
-      {x: 200, y: 270, width: 100, height: 10},  // middle
-      {x: 500, y: 230, width: 100, height: 10},  // right again
-      {x: 100, y: 190, width: 100, height: 10},  // left
-      {x: 350, y: 150, width: 100, height: 10},  // center-right
+      {x: 60,  y: 350, width: 100, height: 10},   // start
+      {x: 400, y: 310, width: 100, height: 10},   // jump right
+      {x: 180, y: 260, width: 100, height: 10},   // jump left
+      {x: 420, y: 210, width: 100, height: 10},   // jump right
+      {x: 250, y: 160, width: 100, height: 10},   // jump left
     ],
-    finish: {x: 600, y: 110, width: 40, height: 10}
+    finish: {x: 500, y: 120, width: 50, height: 10}
   },
   {
+    // Level 2: trickier, more horizontal movement
     platforms: [
-      {x: 100, y: 350, width: 80, height: 10},
-      {x: 500, y: 320, width: 100, height: 10},
-      {x: 250, y: 280, width: 100, height: 10},
-      {x: 450, y: 240, width: 100, height: 10},
-      {x: 150, y: 200, width: 100, height: 10},
-      {x: 400, y: 160, width: 100, height: 10},
-      {x: 250, y: 120, width: 100, height: 10}
+      {x: 80,  y: 350, width: 100, height: 10},   // start
+      {x: 480, y: 310, width: 100, height: 10},   // far right
+      {x: 200, y: 270, width: 100, height: 10},   // left again
+      {x: 400, y: 230, width: 100, height: 10},   // right
+      {x: 150, y: 190, width: 100, height: 10},   // left
+      {x: 380, y: 150, width: 100, height: 10},   // right
     ],
-    finish: {x: 580, y: 80, width: 40, height: 10}
+    finish: {x: 580, y: 110, width: 50, height: 10}
   }
 ];
 
 let currentLevel = 0;
-let player = {x: 50, y: 300, width: 30, height: 30, dx: 0, dy: 0, onGround: false};
+let player = {x: 60, y: 300, width: 30, height: 30, dx: 0, dy: 0, onGround: false};
 const keys = {left:false,right:false,up:false};
 
 // Keyboard input
@@ -47,7 +47,7 @@ document.addEventListener('keyup', e=>{
 });
 
 function resetPlayer(){
-  player.x = 60;
+  player.x = 70;
   player.y = 300;
   player.dx = 0;
   player.dy = 0;
@@ -67,7 +67,6 @@ function gameLoop(){
   if(keys.left) player.dx = -3;
   if(keys.right) player.dx = 3;
 
-  // Apply movement
   player.x += player.dx;
   player.y += player.dy;
 
@@ -75,14 +74,13 @@ function gameLoop(){
   ctx.fillStyle = 'orangered';
   ctx.fillRect(0, FLOOR_Y, canvas.width, canvas.height - FLOOR_Y);
 
-  // Check collision with floor lava
+  // Lava collision
   if(player.y + player.height > FLOOR_Y){
     resetPlayer();
   }
 
   // Platform collisions
   level.platforms.forEach(p => {
-    // top collision
     if(player.x + player.width > p.x && player.x < p.x + p.width){
       if(player.y + player.height > p.y && player.y + player.height - player.dy <= p.y){
         player.y = p.y - player.height;
@@ -110,11 +108,11 @@ function gameLoop(){
     resetPlayer();
   }
 
-  // Draw pillars under platforms
-  ctx.fillStyle = '#5B3A1B';
-  level.platforms.forEach(p => {
-    ctx.fillRect(p.x + p.width/2 - 5, p.y, 10, FLOOR_Y - p.y);
-  });
+  // Pillars under platforms
+    ctx.fillStyle = '#5B3A1B';
+    level.platforms.forEach(p => {
+      ctx.fillRect(p.x + p.width/2 - 5, p.y, 10, FLOOR_Y - p.y);
+    });
 
   // Draw platforms
   ctx.fillStyle = 'green';
