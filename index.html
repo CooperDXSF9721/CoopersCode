@@ -9,8 +9,9 @@
       --bg: #f5f9ff;
       --card: #d9f0ff; /* light blue */
       --accent: #8cc8ff;
+      --red: #e03a3a;
       --radius: 14px;
-      --maxw: 980px;
+      --maxw: 1100px;
       --glass-shadow: 0 6px 18px rgba(20,40,70,0.08);
       --text: #123;
       font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
@@ -22,7 +23,7 @@
     /* Header */
     .header{display:flex; align-items:center; gap:18px; margin-bottom:20px}
     .avatar-wrap{flex:0 0 auto}
-    .avatar{width:110px; height:110px; border-radius:18px; overflow:hidden; box-shadow:var(--glass-shadow); border:4px solid white; display:block}
+    .avatar{width:110px; height:110px; border-radius:50%; overflow:hidden; box-shadow:var(--glass-shadow); border:4px solid white; display:block}
     .avatar img{width:100%; height:100%; object-fit:cover; display:block}
     .title{flex:1}
     .title h1{margin:0; font-size:24px}
@@ -30,40 +31,49 @@
 
     /* Grid of cards */
     .grid{display:grid; grid-template-columns: repeat(2, 1fr); gap:18px}
-    @media (max-width:740px){.grid{grid-template-columns:1fr}}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
 
     .card{background:linear-gradient(180deg,var(--card), #e6f7ff); padding:18px; border-radius:var(--radius); box-shadow:var(--glass-shadow); border:1px solid rgba(15,60,120,0.04)}
     .card h2{margin:0 0 10px 0; font-size:18px; color:#0b3a5a}
     .card p{margin:0; line-height:1.45}
 
-    /* Extra small full width card for footer or schedule if needed */
-    .full{grid-column:1 / -1}
+    /* Schedule calendar styles */
+    .calendar-wrap{display:flex; gap:12px; align-items:flex-start}
+    .hours{width:72px; flex:0 0 auto}
+    .hours div{height:48px; padding-top:6px; color:#214; font-size:13px; text-align:right; padding-right:8px}
+    .days{flex:1; overflow:auto}
+    .days-grid{display:grid; grid-template-columns:repeat(5, 1fr); position:relative}
+    .day-col{min-height: (48px * 18); border-left:1px solid rgba(10,30,60,0.04); padding-left:8px; padding-right:8px}
+    .day-header{font-weight:700; margin-bottom:8px; text-align:center; color:#053c5e}
 
-    /* small helpers */
-    .muted{color:#234; opacity:0.8}
-    .note{font-size:13px; margin-top:8px; color:#18405f}
+    .hour-slot{height:48px; border-bottom:1px dashed rgba(0,0,0,0.03)}
 
-    /* subtle footer */
+    /* Event boxes */
+    .event{position:absolute; left:8px; right:8px; border-radius:8px; background:var(--red); color:white; padding:6px 8px; font-size:13px; box-shadow:0 6px 12px rgba(0,0,0,0.08)}
+    .event.small{font-size:12px; padding:4px 6px}
+
+    /* Now bar */
+    .now-bar{position:absolute; left:0; right:0; height:3px; background:rgba(224,58,58,0.95); box-shadow:0 1px 6px rgba(224,58,58,0.25); z-index:30}
+
+    /* Responsive tweaks */
+    @media (max-width:640px){
+      .hours{display:none}
+      .day-header{font-size:13px}
+      .event{left:6px; right:6px}
+    }
+
+    /* Sports box text formatting */
+    .sports p{white-space:pre-wrap}
+
     .footer{margin-top:22px; text-align:center; color:#345; opacity:0.8; font-size:13px}
-
-    /* Nice little focus for accessibility */
-    a:focus, button:focus{outline:3px solid rgba(140,200,255,0.45); outline-offset:2px}
   </style>
 </head>
 <body>
-  <!--
-    How to use this file:
-    1) Replace `images/profile.jpg` with your picture. Create an `images/` folder next to this file.
-    2) Edit the card text below if you want changes.
-    3) To host on GitHub Pages: create a repository, add this file named `index.html`, push to `main`, then in Settings > Pages enable Pages from the `main` branch root. Your site will be at `https://<your-username>.github.io/<repo>/`.
-  -->
-
   <main class="site">
     <header class="header">
       <div class="avatar-wrap">
-        <!-- Replace the image at images/profile.jpg with your profile picture -->
         <a class="avatar" href="#">
-          <img src="images/profile.jpg" alt="Cooper Ross — profile picture" />
+          <img src="Photo-on-9-26-25-at-9.54AM.jpg" alt="Cooper Ross — profile picture" />
         </a>
       </div>
       <div class="title">
@@ -78,10 +88,47 @@
         <p>My name is Cooper Ross. I'm currently 12 years old and my birthday is on May 13, 2013. I love squash and playing video games with my brother. I have five pets including two dogs, two cats, and a guinnea pig. I have three siblings,  a brother named Bennett who is nineteen years old, a sister who is seventeen years old named Maddeline but we call her Maddie. I also have another sister who's name is Ella and she's sixteen.</p>
       </article>
 
-      <article class="card">
+      <article class="card" id="schedule-card">
         <h2>My Schedule</h2>
-        <p class="muted">(Add your weekly schedule here — school, practice times, or routine.)</p>
-        <p class="note">Example: Mon & Wed — Squash practice 4:30–6:00pm; Sat — Family time; Sun — Robotics club.</p>
+        <div style="font-size:13px; color:#133; margin-bottom:8px">Weekly view — hours listed on the left. The red line shows the current time and updates live.</div>
+        <div class="calendar-wrap" aria-live="polite">
+          <div class="hours" aria-hidden="true">
+            <!-- Hours from 6:00 AM to 12:00 AM -->
+          </div>
+          <div class="days">
+            <div class="days-grid" id="daysGrid">
+              <!-- 5 columns: Mon-Fri -->
+              <div class="day-col" data-day="monday">
+                <div class="day-header">Monday</div>
+                <div class="hour-slot"></div>
+                <div class="hour-slot"></div>
+                <div class="hour-slot"></div>
+                <div class="hour-slot"></div>
+                <div class="hour-slot"></div>
+                <div style="position:relative; padding-top:6px;"><strong>Nothing Planned For Today</strong></div>
+              </div>
+
+              <div class="day-col" data-day="tuesday">
+                <div class="day-header">Tuesday</div>
+                <!-- hour slots will be drawn by JS -->
+              </div>
+
+              <div class="day-col" data-day="wednesday">
+                <div class="day-header">Wednesday</div>
+              </div>
+
+              <div class="day-col" data-day="thursday">
+                <div class="day-header">Thursday</div>
+              </div>
+
+              <div class="day-col" data-day="friday">
+                <div class="day-header">Friday</div>
+              </div>
+            </div>
+            <!-- now bar sits on top of the grid -->
+            <div id="nowBar" class="now-bar" aria-hidden="true"></div>
+          </div>
+        </div>
       </article>
 
       <article class="card">
@@ -89,20 +136,135 @@
         <p>One thing i'm interested in is squash. Some other things are soccer, robotics, video games, and puzzles.</p>
       </article>
 
-      <article class="card">
+      <article class="card sports">
         <h2>Sports</h2>
-        <p class="muted">(Add your sports highlights, teams, or achievements here.)</p>
-        <p class="note">Example: Squash — Club team, practicing since age 9; Soccer — plays recreationally.</p>
+        <p>My main sport is squash. I have been playing it for around six years and I still love it. I play squash all year because it's indoors and regularly play in tournaments. I have training almost seven days a week and don''t really have a time in the year when I stop playing. I also like soccer. I played club soccer for the past couple years but quit this year to focus on squash. Either way, I still love soccer just as much as squash and hope to be able to play again. For school, The sports I will do are Soocer, Squash, and Track & Field. These are the same ones as in my sixth grade year and I really enjoyed them so i'm doing them again.</p>
       </article>
-
-      <!-- Example of a full-width section if you'd like to add more content later -->
-      <!-- <article class="card full">
-        <h2>Projects / Photos</h2>
-        <p>Use this space to show off projects, photos, or links to social profiles.</p>
-      </article> -->
     </section>
 
-    <div class="footer">Made with ♥ — edit this file to personalize. Remember to replace <code>images/profile.jpg</code> with your photo.</div>
+    <div class="footer">Made with ♥ — edit this file to personalize. The `Photo-on-9-26-25-at-9.54AM.jpg` file should sit beside this `index.html` in the repo.</div>
   </main>
+
+  <script>
+    /* Calendar rendering and live now-bar logic */
+    (function(){
+      const startHour = 6; // 6 AM
+      const endHour = 24; // midnight
+      const hourHeight = 48; // px per hour
+      const days = ['monday','tuesday','wednesday','thursday','friday'];
+
+      const daysGrid = document.getElementById('daysGrid');
+      const hoursCol = document.querySelector('.hours');
+
+      // Build hour labels
+      for(let h = startHour; h <= endHour; h++){
+        const el = document.createElement('div');
+        const display = (h===24? '12 AM' : (h>12? (h-12)+':00 PM' : (h===12? '12:00 PM' : (h===0? '12 AM' : h+':00 AM'))));
+        el.textContent = display;
+        hoursCol.appendChild(el);
+      }
+
+      // Fill each day column with hour-slot rows
+      const cols = Array.from(document.querySelectorAll('.day-col'));
+      cols.forEach(col =>{
+        // clear existing slots (leave header and any custom nodes)
+        const header = col.querySelector('.day-header');
+        // add slots container
+        for(let h=startHour; h<endHour; h++){
+          const slot = document.createElement('div');
+          slot.className = 'hour-slot';
+          col.appendChild(slot);
+        }
+        col.style.position = 'relative';
+        col.style.paddingBottom = '12px';
+      });
+
+      // helper: convert hh:mm (24h) to top px offset from startHour
+      function timeToPx(t){
+        // t like '17:45' or hours decimals
+        if(typeof t === 'string'){
+          const [hh,mm] = t.split(':').map(Number);
+          const total = (hh + mm/60) - startHour;
+          return total * hourHeight;
+        }
+        return (t - startHour) * hourHeight;
+      }
+
+      // create events as described
+      const events = [
+        {day:'tuesday', start:'17:45', end:'20:00', title:'Squash Nobles'},
+        {day:'wednesday', start:'16:30', end:'17:30', title:'Squash Dover'},
+        {day:'thursday', start:'19:00', end:'19:45', title:'Squash Lesson Fessenden'},
+        // saturday and sunday are not displayed in the 5-column grid — we will add small notes on Friday area
+      ];
+
+      // Add saturday/sunday events as a compact notice under Friday header (since grid is Mon-Fri)
+      const extraNotes = [
+        {day:'friday', note:'Sat 11:15 AM–12:00 PM — Squash Solo NSTC
+Sat 3:00 PM–3:45 PM — Squash Lesson Fessenden
+Sun 3:00 PM–5:00 PM — Squash Clinic Fessenden'}
+      ];
+
+      // Render event boxes
+      events.forEach(ev=>{
+        const col = document.querySelector(`.day-col[data-day='${ev.day}']`);
+        if(!col) return;
+        const top = timeToPx(ev.start);
+        const height = timeToPx(ev.end) - timeToPx(ev.start);
+        const node = document.createElement('div');
+        node.className = 'event';
+        node.style.top = (36 + top) + 'px'; // 36px to move below day header area
+        node.style.height = Math.max(26, height - 6) + 'px';
+        node.textContent = ev.title + ' (' + ev.start + ' – ' + ev.end + ')';
+        col.appendChild(node);
+      });
+
+      // Add extra notes block under Friday
+      extraNotes.forEach(n =>{
+        const col = document.querySelector(`.day-col[data-day='${n.day}']`);
+        if(!col) return;
+        const note = document.createElement('div');
+        note.style.marginTop = '8px';
+        note.style.padding = '8px';
+        note.style.background = 'rgba(15,60,100,0.06)';
+        note.style.borderRadius = '8px';
+        note.style.fontSize = '13px';
+        note.textContent = n.note;
+        col.appendChild(note);
+      });
+
+      // Now-bar logic
+      const nowBar = document.getElementById('nowBar');
+      const daysContainer = document.querySelector('.days');
+      function updateNow(){
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        // compute pixels from top of daysGrid (taking into account header area)
+        const totalHoursFromStart = (hours + minutes/60) - startHour;
+        const topPx = 36 + (totalHoursFromStart * hourHeight); // 36px header offset
+        nowBar.style.top = topPx + 'px';
+
+        // if before startHour or after endHour, hide the bar
+        if(hours < startHour || hours >= endHour){
+          nowBar.style.display = 'none';
+        } else {
+          nowBar.style.display = 'block';
+        }
+      }
+      // update immediately and then every 20 seconds
+      updateNow();
+      setInterval(updateNow, 20000);
+
+      // basic auto-scroll to keep now visible on load
+      setTimeout(()=>{
+        const rect = nowBar.getBoundingClientRect();
+        if(rect.top < 0 || rect.bottom > window.innerHeight){
+          daysContainer.scrollTop = Math.max(0, nowBar.offsetTop - 120);
+        }
+      },300);
+
+    })();
+  </script>
 </body>
 </html>
