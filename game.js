@@ -214,4 +214,23 @@ window.onload = function () {
     }
 
     ctx.fillStyle = '#228B22';
-    for (const p of level.platforms) ctx.fillRect(p.x, p.y, p.width, p.height
+    for (const p of level.platforms) ctx.fillRect(p.x, p.y, p.width, p.height);
+    for (const mp of level.movingPlatforms) mp.draw();
+    ctx.fillStyle = 'gold';
+    ctx.fillRect(level.finish.x, level.finish.y, level.finish.width, level.finish.height);
+    logs.forEach(log => log.draw());
+    ctx.fillStyle = 'white';
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+  }
+
+  function gameLoop() {
+    updatePlayer();
+    if (levels[currentLevel].logLevel) updateLogs();
+    updateMovingPlatforms();
+    drawLevel();
+    requestAnimationFrame(gameLoop);
+  }
+
+  resetPlayer();
+  gameLoop();
+};
