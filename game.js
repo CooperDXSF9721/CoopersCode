@@ -21,14 +21,14 @@ const levels = [
   {
     platforms: [
       {x: 70, y: 350, width: 100, height: 10},
-      {x: 250, y: 310, width: 100, height: 10},  // closer to wall for smooth jump
+      {x: 250, y: 310, width: 100, height: 10},
       {x: 120, y: 270, width: 100, height: 10},
       {x: 350, y: 230, width: 100, height: 10},
       {x: 150, y: 190, width: 100, height: 10},
       {x: 420, y: 150, width: 100, height: 10},
     ],
     walls: [
-      {x: 350, width: 40, openingY: 230, openingHeight: 80}, // aligned with platform
+      {x: 350, width: 40, openingY: 230, openingHeight: 80},
     ],
     finish: {x: 500, y: 150, width: 50, height: 10}
   },
@@ -38,9 +38,9 @@ const levels = [
       {x: 80, y: 350, width: 100, height: 10},
       {x: 450, y: 330, width: 100, height: 10},
       {x: 150, y: 280, width: 100, height: 10},
-      {x: 400, y: 230, width: 100, height: 10}, // lined up with first wall
+      {x: 400, y: 230, width: 100, height: 10},
       {x: 180, y: 190, width: 100, height: 10},
-      {x: 420, y: 150, width: 100, height: 10}, // lined up with second wall
+      {x: 420, y: 150, width: 100, height: 10},
     ],
     walls: [
       {x: 400, width: 40, openingY: 230, openingHeight: 80},
@@ -54,12 +54,12 @@ const levels = [
       {x: 60, y: 350, width: 100, height: 10},
       {x: 300, y: 310, width: 100, height: 10},
       {x: 120, y: 270, width: 100, height: 10},
-      {x: 340, y: 230, width: 100, height: 10}, // lines up with wall
+      {x: 340, y: 230, width: 100, height: 10},
       {x: 160, y: 190, width: 100, height: 10},
       {x: 380, y: 150, width: 100, height: 10},
     ],
     walls: [
-      {x: 340, width: 40, openingY: 230, openingHeight: 80}, // aligned with platform
+      {x: 340, width: 40, openingY: 230, openingHeight: 80},
     ],
     finish: {x: 560, y: 150, width: 50, height: 10}
   }
@@ -116,26 +116,60 @@ function gameLoop() {
     resetPlayer();
   }
 
-  // Walls
+  // ===== WALLS WITH LANDING PLATFORM =====
   ctx.fillStyle = '#654321';
   level.walls.forEach(w => {
-    // Draw top wall part
-    ctx.fillRect(w.x, 0, w.width, w.openingY);
-    // Draw bottom wall part
-    ctx.fillRect(w.x, w.openingY + w.openingHeight, w.width, FLOOR_Y - (w.openingY + w.openingHeight));
+    const topWall = {x: w.x, y: 0, width: w.width, height: w.openingY};
+    const bottomWall = {x: w.x, y: w.openingY + w.openingHeight, width: w.width, height: FLOOR_Y - (w.openingY + w.openingHeight)};
+    const openingPlatform = {x: w.x, y: w.openingY + w.openingHeight - 10, width: w.width, height: 10};
 
-    // Collision with walls
-    if (player.x + player.width > w.x && player.x < w.x + w.width) {
-      if (!(player.y + player.height > w.openingY && player.y < w.openingY + w.openingHeight)) {
-        if (player.dx > 0) player.x = w.x - player.width;
-        if (player.dx < 0) player.x = w.x + w.width;
+    // Draw walls
+    ctx.fillRect(topWall.x, topWall.y, topWall.width, topWall.height);
+    ctx.fillRect(bottomWall.x, bottomWall.y, bottomWall.width, bottomWall.height);
+
+    // Draw landing platform
+    ctx.fillStyle = 'green';
+    ctx.fillRect(openingPlatform.x, openingPlatform.y, openingPlatform.width, openingPlatform.height);
+
+    // Collision helper
+    function collideRect(a, b) {
+      return a.x < b.x + b.width && a.x + a.width > b.x &&
+             a.y < b.y + b.height && a.y + a.height > b.y;
+    }
+
+    // Top wall collision
+    if (collideRect(player, topWall)) {
+      if (player.dx > 0) player.x = topWall.x - player.width;
+      if (player.dx < 0) player.x = topWall.x + topWall.width;
+      if (player.y + player.height - player.dy <= topWall.y + topWall.height) {
+        player.y = topWall.y + topWall.height;
+        player.dy = 1;
+      }
+    }
+
+    // Bottom wall collision
+    if (collideRect(player, bottomWall)) {
+      if (player.dx > 0) player.x = bottomWall.x - player.width;
+      if (player.dx < 0) player.x = bottomWall.x + bottomWall.width;
+      if (player.y - player.dy >= bottomWall.y) {
+        player.y = bottomWall.y + bottomWall.height;
+        player.dy = 1;
+      }
+    }
+
+    // Opening platform collision (fall onto it)
+    if (collideRect(player, openingPlatform)) {
+      if (player.y + player.height > openingPlatform.y && player.y + player.height - player.dy <= openingPlatform.y) {
+        player.y = openingPlatform.y - player.height;
+        player.dy = 0;
+        player.onGround = true;
       }
     }
   });
 
-  // Platform collisions (no going through from below)
+  // ===== PLATFORM COLLISIONS =====
   level.platforms.forEach(p => {
-    // Landing on top of platform
+    // Landing on top
     if (player.x + player.width > p.x && player.x < p.x + p.width) {
       if (player.y + player.height > p.y && player.y + player.height - player.dy <= p.y) {
         player.y = p.y - player.height;
@@ -143,8 +177,7 @@ function gameLoop() {
         player.onGround = true;
       }
     }
-
-    // Prevent going through from below
+    // Hitting bottom
     if (player.x + player.width > p.x && player.x < p.x + p.width) {
       if (player.y < p.y + p.height && player.y - player.dy >= p.y + p.height) {
         player.y = p.y + p.height;
