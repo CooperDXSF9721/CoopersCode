@@ -6,44 +6,47 @@ const FLOOR_Y = canvas.height - 40;
 // ===== LEVEL DATA =====
 const levels = [
   // ===== STATIC PLATFORM LEVELS =====
-  // LEVEL 1 — easy
+  // LEVEL 1 — simple first challenge
   {
     platforms: [
       {x: 60, y: 350, width: 120, height: 10},
-      {x: 220, y: 320, width: 100, height: 10},
-      {x: 360, y: 290, width: 100, height: 10}
-    ],
-    movingPlatform: null,
-    finish: {x: 480, y: 260, width: 50, height: 10}
-  },
-  // LEVEL 2 — slightly harder
-  {
-    platforms: [
-      {x: 60, y: 350, width: 120, height: 10},
-      {x: 180, y: 310, width: 100, height: 10},
+      {x: 200, y: 310, width: 100, height: 10},
       {x: 340, y: 270, width: 100, height: 10},
-      {x: 500, y: 240, width: 80, height: 10}
+      {x: 480, y: 320, width: 80, height: 10} // step back down
     ],
     movingPlatform: null,
-    finish: {x: 580, y: 210, width: 50, height: 10}
+    finish: {x: 560, y: 280, width: 50, height: 10}
   },
-  // LEVEL 3 — harder jumps
-  {
-    platforms: [
-      {x: 60, y: 350, width: 100, height: 10},
-      {x: 200, y: 320, width: 100, height: 10},
-      {x: 360, y: 280, width: 100, height: 10},
-      {x: 520, y: 240, width: 100, height: 10}
-    ],
-    movingPlatform: null,
-    finish: {x: 600, y: 200, width: 50, height: 10}
-  },
-  // ===== MOVING PLATFORM LEVELS =====
-  // LEVEL 4 — first moving platform
+  // LEVEL 2 — zig-zag layout, not just rising steps
   {
     platforms: [
       {x: 60, y: 350, width: 120, height: 10},
-      {x: 250, y: 320, width: 100, height: 10}
+      {x: 180, y: 300, width: 100, height: 10},
+      {x: 320, y: 340, width: 80, height: 10}, // lower platform
+      {x: 420, y: 280, width: 100, height: 10},
+      {x: 540, y: 320, width: 80, height: 10}
+    ],
+    movingPlatform: null,
+    finish: {x: 600, y: 260, width: 50, height: 10}
+  },
+  // LEVEL 3 — platforms spread horizontally with gaps
+  {
+    platforms: [
+      {x: 60, y: 350, width: 120, height: 10},
+      {x: 200, y: 310, width: 80, height: 10},
+      {x: 320, y: 270, width: 120, height: 10},
+      {x: 460, y: 320, width: 100, height: 10},
+      {x: 580, y: 280, width: 80, height: 10}
+    ],
+    movingPlatform: null,
+    finish: {x: 640, y: 250, width: 50, height: 10}
+  },
+
+  // ===== MOVING PLATFORM LEVELS =====
+  // LEVEL 4 — simple moving platform required
+  {
+    platforms: [
+      {x: 60, y: 350, width: 120, height: 10}
     ],
     movingPlatform: {
       x: 140,
@@ -51,17 +54,17 @@ const levels = [
       width: 100,
       height: 10,
       minX: 140,
-      maxX: 360,
+      maxX: 400,
       speed: 2,
       dx: 2
     },
-    finish: {x: 480, y: FLOOR_Y - 30, width: 50, height: 10}
+    finish: {x: 450, y: FLOOR_Y - 30, width: 50, height: 10}
   },
-  // LEVEL 5 — multiple moving platforms, harder timing
+  // LEVEL 5 — multiple moving platforms for timing
   {
     platforms: [
       {x: 60, y: 350, width: 120, height: 10},
-      {x: 220, y: 320, width: 100, height: 10}
+      {x: 260, y: 320, width: 100, height: 10}
     ],
     movingPlatform: {
       x: 140,
@@ -75,24 +78,22 @@ const levels = [
     },
     finish: {x: 500, y: FLOOR_Y - 30, width: 50, height: 10}
   },
-  // LEVEL 6 — most difficult, requires using moving platform to reach finish
+  // LEVEL 6 — timing + jump puzzle with moving platform and middle normal platform
   {
     platforms: [
-      {x: 60, y: 350, width: 120, height: 10},
-      {x: 200, y: 320, width: 100, height: 10},
-      {x: 360, y: 280, width: 100, height: 10}
+      {x: 260, y: FLOOR_Y - 100, width: 100, height: 10} // normal platform in middle
     ],
     movingPlatform: {
-      x: 140,
-      y: FLOOR_Y - 90,
+      x: 60,
+      y: FLOOR_Y - 20,
       width: 100,
       height: 10,
-      minX: 140,
-      maxX: 450,
+      minX: 60,
+      maxX: 500,
       speed: 2,
       dx: 2
     },
-    finish: {x: 480, y: FLOOR_Y - 120, width: 50, height: 10}
+    finish: {x: 520, y: FLOOR_Y - 20, width: 50, height: 10} // finish at same height as moving platform
   }
 ];
 
@@ -211,25 +212,4 @@ function gameLoop() {
 
   // Draw player
   ctx.fillStyle = 'blue';
-  ctx.fillRect(player.x, player.y, player.width, player.height);
-
-  // ===== FINISH CHECK =====
-  if (
-    player.x + player.width > f.x &&
-    player.x < f.x + f.width &&
-    player.y + player.height > f.y &&
-    player.y < f.y + f.height
-  ) {
-    currentLevel++;
-    if (currentLevel >= levels.length) {
-      alert('🎉 You beat all levels!');
-      currentLevel = 0;
-    }
-    resetPlayer();
-  }
-
-  requestAnimationFrame(gameLoop);
-}
-
-resetPlayer();
-gameLoop();
+  ctx.fillRect(player.x, player.y, player.width, player
