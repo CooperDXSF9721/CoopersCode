@@ -21,18 +21,18 @@ const levels = [
       {x: 60, y: 350, width: 120, height: 10}, // starting platform
     ],
     movingPlatform: {
-      x: 180, // start closer to player
-      y: 250,
+      x: 180,          // start closer to player
+      y: 270,          // lowered for easier jump
       width: 100,
       height: 10,
       minX: 180,
       maxX: 450,
       speed: 2,
       dx: 2,
-      baseY: 250,       // for bobbing
+      baseY: 270,       // for bobbing
       bobAmplitude: 10, // pixels to move up/down
-      bobSpeed: 0.05,   // how fast it bobs
-      bobAngle: 0       // current angle for sine
+      bobSpeed: 0.1,    // faster bobbing
+      bobAngle: 0
     },
     finish: {x: 450, y: 250, width: 50, height: 10} // finish only reachable via moving platform
   }
@@ -104,7 +104,7 @@ function gameLoop() {
         // Move player with moving platform
         if (level.movingPlatform && p === level.movingPlatform) {
           player.x += level.movingPlatform.dx;
-          player.y += level.movingPlatform.bobAmplitude * Math.sin(level.movingPlatform.bobAngle) - (p.y - level.movingPlatform.y); // adjust for bob
+          player.y += level.movingPlatform.bobAmplitude * Math.sin(level.movingPlatform.bobAngle) - (p.y - level.movingPlatform.y);
         }
       }
     }
