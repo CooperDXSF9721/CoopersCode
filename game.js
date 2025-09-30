@@ -5,7 +5,7 @@ const FLOOR_Y = canvas.height - 40;
 
 // ===== LEVEL DATA =====
 const levels = [
-  // LEVEL 1 — Simple staircase path
+  // LEVEL 1
   {
     platforms: [
       {x: 80, y: 350, width: 100, height: 10},
@@ -17,13 +17,12 @@ const levels = [
     walls: [],
     finish: {x: 380, y: 150, width: 50, height: 10}
   },
-  // LEVEL 2 — Staircase + wall with aligned tunnel
+  // LEVEL 2 — Staircase + wall with achievable jump
   {
     platforms: [
       {x: 70, y: 350, width: 100, height: 10},
-      {x: 250, y: 310, width: 100, height: 10},
-      {x: 120, y: 270, width: 100, height: 10},
-      {x: 350, y: 230, width: 100, height: 10},
+      {x: 250, y: 310, width: 100, height: 10}, // before wall
+      {x: 360, y: 260, width: 100, height: 10}, // after wall, reachable
       {x: 150, y: 190, width: 100, height: 10},
       {x: 420, y: 150, width: 100, height: 10},
     ],
@@ -32,13 +31,13 @@ const levels = [
     ],
     finish: {x: 500, y: 150, width: 50, height: 10}
   },
-  // LEVEL 3 — More complex walls with aligned jumps
+  // LEVEL 3 — Adjusted for smooth jump paths
   {
     platforms: [
       {x: 80, y: 350, width: 100, height: 10},
       {x: 450, y: 330, width: 100, height: 10},
       {x: 150, y: 280, width: 100, height: 10},
-      {x: 400, y: 230, width: 100, height: 10},
+      {x: 400, y: 240, width: 100, height: 10}, // lowered slightly
       {x: 180, y: 190, width: 100, height: 10},
       {x: 420, y: 150, width: 100, height: 10},
     ],
@@ -56,7 +55,7 @@ const levels = [
       {x: 120, y: 270, width: 100, height: 10},
       {x: 340, y: 230, width: 100, height: 10},
       {x: 160, y: 190, width: 100, height: 10},
-      {x: 380, y: 150, width: 100, height: 10},
+      {x: 380, y: 160, width: 100, height: 10}, // lowered for reachable jump
     ],
     walls: [
       {x: 340, width: 40, openingY: 230, openingHeight: 80},
