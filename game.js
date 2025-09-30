@@ -64,112 +64,72 @@ window.onload = function () {
   }
 
   const levels = [
-    // Level 1
+    // Levels 1-6 unchanged
     {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 20, width: 100, height: 20 },
-        { x: 220, y: FLOOR_Y - 80, width: 100, height: 20 },
-        { x: 400, y: FLOOR_Y - 140, width: 100, height: 20 }
-      ],
+      platforms: [{ x: 50, y: FLOOR_Y - 20, width: 100, height: 20 }, { x: 220, y: FLOOR_Y - 80, width: 100, height: 20 }, { x: 400, y: FLOOR_Y - 140, width: 100, height: 20 }],
       finish: { x: 600, y: FLOOR_Y - 180, width: 50, height: 10 },
       movingPlatforms: [],
       spikes: []
     },
-
-    // Level 2
     {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 20, width: 100, height: 20 },
-        { x: 200, y: FLOOR_Y - 100, width: 100, height: 20 },
-        { x: 100, y: FLOOR_Y - 180, width: 100, height: 20 },
-        { x: 300, y: FLOOR_Y - 260, width: 100, height: 20 }
-      ],
+      platforms: [{ x: 50, y: FLOOR_Y - 20, width: 100, height: 20 }, { x: 200, y: FLOOR_Y - 100, width: 100, height: 20 }, { x: 100, y: FLOOR_Y - 180, width: 100, height: 20 }, { x: 300, y: FLOOR_Y - 260, width: 100, height: 20 }],
       finish: { x: 500, y: FLOOR_Y - 300, width: 50, height: 10 },
       movingPlatforms: [],
       spikes: []
     },
-
-    // Level 3
     {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 20, width: 100, height: 20 },
-        { x: 250, y: FLOOR_Y - 40, width: 100, height: 20 },
-        { x: 450, y: FLOOR_Y - 60, width: 100, height: 20 },
-        { x: 650, y: FLOOR_Y - 80, width: 100, height: 20 }
-      ],
+      platforms: [{ x: 50, y: FLOOR_Y - 20, width: 100, height: 20 }, { x: 250, y: FLOOR_Y - 40, width: 100, height: 20 }, { x: 450, y: FLOOR_Y - 60, width: 100, height: 20 }, { x: 650, y: FLOOR_Y - 80, width: 100, height: 20 }],
       finish: { x: 700, y: FLOOR_Y - 120, width: 50, height: 10 },
       movingPlatforms: [],
       spikes: []
     },
-
-    // Level 4
     {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 100, width: 100, height: 20 }
-      ],
-      movingPlatforms: [
-        new MovingPlatform(220, FLOOR_Y - 120, 100, 15, 150, 2.5)
-      ],
+      platforms: [{ x: 50, y: FLOOR_Y - 100, width: 100, height: 20 }],
+      movingPlatforms: [new MovingPlatform(220, FLOOR_Y - 120, 100, 15, 150, 2.5)],
       finish: { x: 450, y: FLOOR_Y - 160, width: 50, height: 10 },
       spikes: []
     },
-
-    // Level 5
     {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 100, width: 100, height: 20 }
-      ],
-      movingPlatforms: [
-        new MovingPlatform(200, FLOOR_Y - 50, 100, 15, 150, 3),
-        new MovingPlatform(450, FLOOR_Y - 140, 100, 15, 120, 2.5)
-      ],
+      platforms: [{ x: 50, y: FLOOR_Y - 100, width: 100, height: 20 }],
+      movingPlatforms: [new MovingPlatform(200, FLOOR_Y - 50, 100, 15, 150, 3), new MovingPlatform(450, FLOOR_Y - 140, 100, 15, 120, 2.5)],
+      finish: { x: 700, y: FLOOR_Y - 180, width: 50, height: 10 },
+      spikes: []
+    },
+    {
+      platforms: [{ x: 50, y: FLOOR_Y - 80, width: 100, height: 20 }],
+      movingPlatforms: [new MovingPlatform(150, FLOOR_Y - 40, 100, 15, 200, 2.5), new MovingPlatform(500, FLOOR_Y - 120, 100, 15, 150, 2.5)],
       finish: { x: 700, y: FLOOR_Y - 180, width: 50, height: 10 },
       spikes: []
     },
 
-    // Level 6
+    // Level 7: straight shot with spikes on the floor
     {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 80, width: 100, height: 20 }
-      ],
-      movingPlatforms: [
-        new MovingPlatform(150, FLOOR_Y - 40, 100, 15, 200, 2.5),
-        new MovingPlatform(500, FLOOR_Y - 120, 100, 15, 150, 2.5)
-      ],
-      finish: { x: 700, y: FLOOR_Y - 180, width: 50, height: 10 },
-      spikes: []
-    },
-
-    // Level 7 (spikes, straight shot)
-    {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 40, width: 100, height: 20 },
-        { x: 200, y: FLOOR_Y - 40, width: 100, height: 20 },
-        { x: 350, y: FLOOR_Y - 40, width: 100, height: 20 },
-        { x: 500, y: FLOOR_Y - 40, width: 100, height: 20 }
-      ],
+      platforms: [{ x: 50, y: FLOOR_Y - 40, width: 700, height: 20 }],
       movingPlatforms: [],
-      finish: { x: 650, y: FLOOR_Y - 40, width: 50, height: 10 },
+      finish: { x: 750, y: FLOOR_Y - 40, width: 50, height: 10 },
       spikes: [
-        new Spike(150, FLOOR_Y - 10, 50, 10),
-        new Spike(300, FLOOR_Y - 10, 50, 10),
-        new Spike(450, FLOOR_Y - 10, 50, 10)
+        new Spike(150, FLOOR_Y - 10, 20, 10),
+        new Spike(300, FLOOR_Y - 10, 20, 10),
+        new Spike(450, FLOOR_Y - 10, 20, 10),
+        new Spike(600, FLOOR_Y - 10, 20, 10)
       ]
     },
 
-    // Level 8 (slightly harder)
+    // Level 8: jumping between platforms with spikes on top of platforms
     {
       platforms: [
-        { x: 50, y: FLOOR_Y - 40, width: 120, height: 20 },
-        { x: 250, y: FLOOR_Y - 40, width: 120, height: 20 },
-        { x: 450, y: FLOOR_Y - 40, width: 120, height: 20 }
+        { x: 50, y: FLOOR_Y - 40, width: 100, height: 20 },
+        { x: 250, y: FLOOR_Y - 100, width: 100, height: 20 },
+        { x: 450, y: FLOOR_Y - 60, width: 100, height: 20 },
+        { x: 650, y: FLOOR_Y - 120, width: 100, height: 20 }
       ],
       movingPlatforms: [],
-      finish: { x: 700, y: FLOOR_Y - 40, width: 50, height: 10 },
+      finish: { x: 750, y: FLOOR_Y - 120, width: 50, height: 10 },
       spikes: [
-        new Spike(180, FLOOR_Y - 10, 40, 10),
-        new Spike(380, FLOOR_Y - 10, 40, 10),
-        new Spike(580, FLOOR_Y - 10, 40, 10)
+        new Spike(50, FLOOR_Y - 60, 20, 20),
+        new Spike(250, FLOOR_Y - 120, 20, 20),
+        new Spike(450, FLOOR_Y - 80, 20, 20),
+        new Spike(650, FLOOR_Y - 140, 20, 20)
       ]
     }
   ];
@@ -208,7 +168,7 @@ window.onload = function () {
 
     const level = levels[currentLevel];
 
-    // Platform collision
+    // Platform collisions
     for (const p of level.platforms) {
       if (player.x < p.x + p.width &&
           player.x + player.width > p.x &&
@@ -264,7 +224,6 @@ window.onload = function () {
       resetPlayer();
     }
 
-    // Fall off screen
     if (player.y > canvas.height + 100) resetPlayer();
   }
 
