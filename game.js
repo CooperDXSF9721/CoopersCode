@@ -17,34 +17,34 @@ const levels = [
     walls: [],
     finish: {x: 380, y: 150, width: 50, height: 10}
   },
-  // LEVEL 2 — Staircase + wall with tunnel
+  // LEVEL 2 — Staircase + wall with aligned tunnel
   {
     platforms: [
       {x: 70, y: 350, width: 100, height: 10},
-      {x: 300, y: 310, width: 100, height: 10},
+      {x: 250, y: 310, width: 100, height: 10},  // closer to wall for smooth jump
       {x: 120, y: 270, width: 100, height: 10},
       {x: 350, y: 230, width: 100, height: 10},
       {x: 150, y: 190, width: 100, height: 10},
       {x: 420, y: 150, width: 100, height: 10},
     ],
     walls: [
-      {x: 250, width: 40, openingY: 270, openingHeight: 80}, // wall with a tunnel
+      {x: 350, width: 40, openingY: 230, openingHeight: 80}, // aligned with platform
     ],
     finish: {x: 500, y: 150, width: 50, height: 10}
   },
-  // LEVEL 3 — More complex wall and path
+  // LEVEL 3 — More complex walls with aligned jumps
   {
     platforms: [
       {x: 80, y: 350, width: 100, height: 10},
       {x: 450, y: 330, width: 100, height: 10},
       {x: 150, y: 280, width: 100, height: 10},
-      {x: 400, y: 230, width: 100, height: 10},
+      {x: 400, y: 230, width: 100, height: 10}, // lined up with first wall
       {x: 180, y: 190, width: 100, height: 10},
-      {x: 420, y: 150, width: 100, height: 10},
+      {x: 420, y: 150, width: 100, height: 10}, // lined up with second wall
     ],
     walls: [
-      {x: 300, width: 40, openingY: 240, openingHeight: 90},
-      {x: 520, width: 40, openingY: 180, openingHeight: 80},
+      {x: 400, width: 40, openingY: 230, openingHeight: 80},
+      {x: 420, width: 40, openingY: 150, openingHeight: 80},
     ],
     finish: {x: 600, y: 130, width: 50, height: 10}
   },
@@ -54,12 +54,12 @@ const levels = [
       {x: 60, y: 350, width: 100, height: 10},
       {x: 300, y: 310, width: 100, height: 10},
       {x: 120, y: 270, width: 100, height: 10},
-      {x: 340, y: 230, width: 100, height: 10},
+      {x: 340, y: 230, width: 100, height: 10}, // lines up with wall
       {x: 160, y: 190, width: 100, height: 10},
       {x: 380, y: 150, width: 100, height: 10},
     ],
     walls: [
-      {x: 500, width: 40, openingY: 260, openingHeight: 100}, // must go under and up
+      {x: 340, width: 40, openingY: 230, openingHeight: 80}, // aligned with platform
     ],
     finish: {x: 560, y: 150, width: 50, height: 10}
   }
@@ -127,7 +127,6 @@ function gameLoop() {
     // Collision with walls
     if (player.x + player.width > w.x && player.x < w.x + w.width) {
       if (!(player.y + player.height > w.openingY && player.y < w.openingY + w.openingHeight)) {
-        // Player is not in the opening
         if (player.dx > 0) player.x = w.x - player.width;
         if (player.dx < 0) player.x = w.x + w.width;
       }
