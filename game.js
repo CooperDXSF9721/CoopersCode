@@ -102,20 +102,20 @@ window.onload = function () {
       spikes: []
     },
 
-    // Level 7: straight shot with spikes on the floor
+    // Level 7: one platform to finish, spikes on top
     {
       platforms: [{ x: 50, y: FLOOR_Y - 40, width: 700, height: 20 }],
       movingPlatforms: [],
       finish: { x: 750, y: FLOOR_Y - 40, width: 50, height: 10 },
       spikes: [
-        new Spike(150, FLOOR_Y - 10, 20, 10),
-        new Spike(300, FLOOR_Y - 10, 20, 10),
-        new Spike(450, FLOOR_Y - 10, 20, 10),
-        new Spike(600, FLOOR_Y - 10, 20, 10)
+        new Spike(150, FLOOR_Y - 60, 20, 20),
+        new Spike(300, FLOOR_Y - 60, 20, 20),
+        new Spike(450, FLOOR_Y - 60, 20, 20),
+        new Spike(600, FLOOR_Y - 60, 20, 20)
       ]
     },
 
-    // Level 8: jumping between platforms with spikes on top of platforms
+    // Level 8: jumps between platforms, no spike on starting platform
     {
       platforms: [
         { x: 50, y: FLOOR_Y - 40, width: 100, height: 20 },
@@ -126,7 +126,6 @@ window.onload = function () {
       movingPlatforms: [],
       finish: { x: 750, y: FLOOR_Y - 120, width: 50, height: 10 },
       spikes: [
-        new Spike(50, FLOOR_Y - 60, 20, 20),
         new Spike(250, FLOOR_Y - 120, 20, 20),
         new Spike(450, FLOOR_Y - 80, 20, 20),
         new Spike(650, FLOOR_Y - 140, 20, 20)
