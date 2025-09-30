@@ -21,20 +21,16 @@ const levels = [
       {x: 60, y: 350, width: 120, height: 10}, // starting platform
     ],
     movingPlatform: {
-      x: 140,           // closer to starting platform
-      y: 290,           // lower for easier jump
+      x: 140,           // close to starting platform
+      y: FLOOR_Y - 20,  // practically on the ground
       width: 100,
       height: 10,
       minX: 140,
       maxX: 450,
       speed: 2,
-      dx: 2,
-      baseY: 290,       // for bobbing
-      bobAmplitude: 10, // pixels to move up/down
-      bobSpeed: 0.1,    // faster bobbing
-      bobAngle: 0
+      dx: 2
     },
-    finish: {x: 450, y: 250, width: 50, height: 10} // finish only reachable via moving platform
+    finish: {x: 450, y: FLOOR_Y - 30, width: 50, height: 10} // finish at normal height
   }
 ];
 
@@ -104,7 +100,6 @@ function gameLoop() {
         // Move player with moving platform
         if (level.movingPlatform && p === level.movingPlatform) {
           player.x += level.movingPlatform.dx;
-          player.y += level.movingPlatform.bobAmplitude * Math.sin(level.movingPlatform.bobAngle) - (p.y - level.movingPlatform.y);
         }
       }
     }
@@ -132,16 +127,13 @@ function gameLoop() {
       mp.dx *= -1;
       mp.x += mp.dx; // prevent overshoot
     }
-    // Vertical bobbing
-    mp.bobAngle += mp.bobSpeed;
-    mp.y = mp.baseY + mp.bobAmplitude * Math.sin(mp.bobAngle);
   }
 
   // ===== DRAW PLATFORMS =====
   ctx.fillStyle = 'green';
   level.platforms.forEach(p => ctx.fillRect(p.x, p.y, p.width, p.height));
 
-  // Draw moving platform with floating effect
+  // Draw moving platform
   if (level.movingPlatform) {
     const mp = level.movingPlatform;
     ctx.fillStyle = 'cyan';
