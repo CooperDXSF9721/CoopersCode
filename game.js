@@ -5,24 +5,86 @@ const FLOOR_Y = canvas.height - 40;
 
 // ===== LEVEL DATA =====
 const levels = [
-  // LEVEL 1 — simple staircase to finish
+  // ===== STATIC PLATFORM LEVELS =====
+  // LEVEL 1 — easy
   {
     platforms: [
-      {x: 80, y: 350, width: 100, height: 10},
-      {x: 280, y: 310, width: 100, height: 10},
-      {x: 160, y: 270, width: 100, height: 10},
+      {x: 60, y: 350, width: 120, height: 10},
+      {x: 220, y: 320, width: 100, height: 10},
+      {x: 360, y: 290, width: 100, height: 10}
     ],
     movingPlatform: null,
-    finish: {x: 400, y: 250, width: 50, height: 10}
+    finish: {x: 480, y: 260, width: 50, height: 10}
   },
-  // LEVEL 2 — moving platform required to reach finish
+  // LEVEL 2 — slightly harder
   {
     platforms: [
-      {x: 60, y: 350, width: 120, height: 10}, // starting platform
+      {x: 60, y: 350, width: 120, height: 10},
+      {x: 180, y: 310, width: 100, height: 10},
+      {x: 340, y: 270, width: 100, height: 10},
+      {x: 500, y: 240, width: 80, height: 10}
+    ],
+    movingPlatform: null,
+    finish: {x: 580, y: 210, width: 50, height: 10}
+  },
+  // LEVEL 3 — harder jumps
+  {
+    platforms: [
+      {x: 60, y: 350, width: 100, height: 10},
+      {x: 200, y: 320, width: 100, height: 10},
+      {x: 360, y: 280, width: 100, height: 10},
+      {x: 520, y: 240, width: 100, height: 10}
+    ],
+    movingPlatform: null,
+    finish: {x: 600, y: 200, width: 50, height: 10}
+  },
+  // ===== MOVING PLATFORM LEVELS =====
+  // LEVEL 4 — first moving platform
+  {
+    platforms: [
+      {x: 60, y: 350, width: 120, height: 10},
+      {x: 250, y: 320, width: 100, height: 10}
     ],
     movingPlatform: {
-      x: 140,           // close to starting platform
-      y: FLOOR_Y - 20,  // practically on the ground
+      x: 140,
+      y: FLOOR_Y - 20,
+      width: 100,
+      height: 10,
+      minX: 140,
+      maxX: 360,
+      speed: 2,
+      dx: 2
+    },
+    finish: {x: 480, y: FLOOR_Y - 30, width: 50, height: 10}
+  },
+  // LEVEL 5 — multiple moving platforms, harder timing
+  {
+    platforms: [
+      {x: 60, y: 350, width: 120, height: 10},
+      {x: 220, y: 320, width: 100, height: 10}
+    ],
+    movingPlatform: {
+      x: 140,
+      y: FLOOR_Y - 60,
+      width: 100,
+      height: 10,
+      minX: 140,
+      maxX: 400,
+      speed: 2,
+      dx: 2
+    },
+    finish: {x: 500, y: FLOOR_Y - 30, width: 50, height: 10}
+  },
+  // LEVEL 6 — most difficult, requires using moving platform to reach finish
+  {
+    platforms: [
+      {x: 60, y: 350, width: 120, height: 10},
+      {x: 200, y: 320, width: 100, height: 10},
+      {x: 360, y: 280, width: 100, height: 10}
+    ],
+    movingPlatform: {
+      x: 140,
+      y: FLOOR_Y - 90,
       width: 100,
       height: 10,
       minX: 140,
@@ -30,7 +92,7 @@ const levels = [
       speed: 2,
       dx: 2
     },
-    finish: {x: 450, y: FLOOR_Y - 30, width: 50, height: 10} // finish at normal height
+    finish: {x: 480, y: FLOOR_Y - 120, width: 50, height: 10}
   }
 ];
 
@@ -121,7 +183,6 @@ function gameLoop() {
   // ===== MOVING PLATFORM LOGIC =====
   if (level.movingPlatform) {
     const mp = level.movingPlatform;
-    // Horizontal movement
     mp.x += mp.dx;
     if (mp.x < mp.minX || mp.x + mp.width > mp.maxX) {
       mp.dx *= -1;
