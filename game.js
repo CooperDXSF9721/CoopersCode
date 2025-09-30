@@ -21,15 +21,15 @@ const levels = [
       {x: 60, y: 350, width: 120, height: 10}, // starting platform
     ],
     movingPlatform: {
-      x: 180,          // start closer to player
-      y: 270,          // lowered for easier jump
+      x: 140,           // closer to starting platform
+      y: 290,           // lower for easier jump
       width: 100,
       height: 10,
-      minX: 180,
+      minX: 140,
       maxX: 450,
       speed: 2,
       dx: 2,
-      baseY: 270,       // for bobbing
+      baseY: 290,       // for bobbing
       bobAmplitude: 10, // pixels to move up/down
       bobSpeed: 0.1,    // faster bobbing
       bobAngle: 0
