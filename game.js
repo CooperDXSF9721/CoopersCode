@@ -3,75 +3,69 @@ const ctx = canvas.getContext('2d');
 
 const FLOOR_Y = canvas.height - 40; // lava height
 
-// Utility: simple collision check
 function rectsOverlap(a, b) {
   return a.x < b.x + b.width && a.x + a.width > b.x &&
          a.y < b.y + b.height && a.y + a.height > b.y;
 }
 
-// --- LEVELS ---
+// Levels
 const levels = [
-  // LEVEL 1: simple intro
   {
+    // Level 1 (intro)
     platforms: [
-      {x: 50,  y: 350, width: 100, height: 10},   // start
-      {x: 300, y: 310, width: 100, height: 10},   // right
-      {x: 150, y: 260, width: 100, height: 10},   // left
-      {x: 350, y: 210, width: 100, height: 10},   // right
+      {x: 50,  y: 350, width: 100, height: 10},
+      {x: 300, y: 310, width: 100, height: 10},
+      {x: 150, y: 260, width: 100, height: 10},
+      {x: 350, y: 210, width: 100, height: 10},
     ],
     walls: [],
     finish: {x: 380, y: 170, width: 50, height: 10}
   },
-
-  // LEVEL 2: staircase climbing
   {
+    // Level 2 (staircase)
     platforms: [
-      {x: 60,  y: 350, width: 100, height: 10},   // start
-      {x: 300, y: 310, width: 100, height: 10},   // step 1
-      {x: 120, y: 270, width: 100, height: 10},   // step 2
-      {x: 330, y: 230, width: 100, height: 10},   // step 3
-      {x: 150, y: 190, width: 100, height: 10},   // step 4
-      {x: 380, y: 150, width: 100, height: 10},   // step 5
+      {x: 60,  y: 350, width: 100, height: 10},
+      {x: 300, y: 310, width: 100, height: 10},
+      {x: 120, y: 270, width: 100, height: 10},
+      {x: 330, y: 230, width: 100, height: 10},
+      {x: 150, y: 190, width: 100, height: 10},
+      {x: 380, y: 150, width: 100, height: 10},
     ],
     walls: [],
     finish: {x: 400, y: 110, width: 50, height: 10}
   },
-
-  // LEVEL 3: staircase up then drop down behind wall
   {
+    // Level 3 (staircase + wall with hole)
     platforms: [
-      {x: 70,  y: 350, width: 100, height: 10},   // start
-      {x: 300, y: 310, width: 100, height: 10},   // step 1
-      {x: 130, y: 270, width: 100, height: 10},   // step 2
-      {x: 340, y: 230, width: 100, height: 10},   // step 3
-      {x: 160, y: 190, width: 100, height: 10},   // step 4
-      {x: 400, y: 150, width: 100, height: 10},   // step 5
-
-      {x: 450, y: 350, width: 100, height: 10},   // landing after drop
-      {x: 550, y: 310, width: 100, height: 10},   // approach finish
+      {x: 70,  y: 350, width: 100, height: 10},
+      {x: 300, y: 310, width: 100, height: 10},
+      {x: 130, y: 270, width: 100, height: 10},
+      {x: 340, y: 230, width: 100, height: 10},
+      {x: 160, y: 190, width: 100, height: 10},
+      {x: 400, y: 150, width: 100, height: 10},
+      {x: 500, y: 350, width: 100, height: 10},
+      {x: 620, y: 310, width: 100, height: 10}
     ],
     walls: [
-      {x: 500, y: 220, width: 30, height: 130, holeY: 280, holeHeight: 40} // wall with hole
+      {x: 460, width: 40, holeY: 250, holeHeight: 70} // floor to ceiling
     ],
-    finish: {x: 600, y: 270, width: 50, height: 10}
+    finish: {x: 660, y: 270, width: 50, height: 10}
   },
-
-  // LEVEL 4: tricky wall navigation
   {
+    // Level 4 (wall navigation)
     platforms: [
-      {x: 60,  y: 350, width: 100, height: 10},   // start
-      {x: 300, y: 310, width: 100, height: 10},   // right
-      {x: 100, y: 270, width: 100, height: 10},   // left
-      {x: 400, y: 230, width: 100, height: 10},   // right
-      {x: 200, y: 190, width: 100, height: 10},   // left
-
-      {x: 550, y: 350, width: 100, height: 10},   // after wall
-      {x: 650, y: 310, width: 100, height: 10},   // near finish
+      {x: 60,  y: 350, width: 100, height: 10},
+      {x: 300, y: 310, width: 100, height: 10},
+      {x: 100, y: 270, width: 100, height: 10},
+      {x: 400, y: 230, width: 100, height: 10},
+      {x: 200, y: 190, width: 100, height: 10},
+      {x: 600, y: 350, width: 100, height: 10},
+      {x: 700, y: 310, width: 100, height: 10},
     ],
     walls: [
-      {x: 500, y: 200, width: 40, height: 200, holeY: 320, holeHeight: 40}, // must go under hole
+      {x: 500, width: 40, holeY: 300, holeHeight: 80} // bigger hole
     ],
-    finish: {x: 700, y: 270, width: 50, height: 10}
+    finish: {x: 740, y: 270, width: 50, height: 10}
   }
 ];
 
@@ -100,28 +94,32 @@ function resetPlayer(){
 }
 
 function handleCollisions(level){
-  // Platform collisions
   player.onGround = false;
+
+  // Platforms
   level.platforms.forEach(p => {
     if(player.x + player.width > p.x && player.x < p.x + p.width){
+      // Landing from above
       if(player.y + player.height > p.y && player.y + player.height - player.dy <= p.y){
         player.y = p.y - player.height;
         player.dy = 0;
         player.onGround = true;
       }
+      // Hitting head from below (no going through)
+      else if(player.y < p.y + p.height && player.y - player.dy >= p.y + p.height){
+        player.y = p.y + p.height;
+        player.dy = 0;
+      }
     }
   });
 
-  // Wall collisions (solid parts only)
+  // Walls (floor-to-ceiling)
   level.walls.forEach(w => {
-    // Top part of wall
-    let topRect = {x:w.x, y:w.y, width:w.width, height:w.holeY - w.y};
-    // Bottom part
-    let bottomRect = {x:w.x, y:w.holeY + w.holeHeight, width:w.width, height:w.y + w.height - (w.holeY + w.holeHeight)};
-
-    [topRect, bottomRect].forEach(part => {
+    const topPart = {x:w.x, y:0, width:w.width, height:w.holeY};
+    const bottomPart = {x:w.x, y:w.holeY + w.holeHeight, width:w.width, height:canvas.height - (w.holeY + w.holeHeight)};
+    [topPart, bottomPart].forEach(part=>{
       if(rectsOverlap(player, part)){
-        // Push out horizontally (simplest)
+        // horizontal push
         if(player.x + player.width/2 < part.x + part.width/2){
           player.x = part.x - player.width;
         } else {
@@ -137,9 +135,9 @@ function drawLevel(level){
   ctx.fillStyle = 'orangered';
   ctx.fillRect(0, FLOOR_Y, canvas.width, canvas.height - FLOOR_Y);
 
-  // Pillars under platforms
+  // Pillars
   ctx.fillStyle = '#5B3A1B';
-  level.platforms.forEach(p => {
+  level.platforms.forEach(p=>{
     ctx.fillRect(p.x + p.width/2 - 5, p.y, 10, FLOOR_Y - p.y);
   });
 
@@ -149,16 +147,16 @@ function drawLevel(level){
 
   // Walls
   ctx.fillStyle = 'gray';
-  level.walls.forEach(w => {
-    // top part
-    ctx.fillRect(w.x, w.y, w.width, w.holeY - w.y);
-    // bottom part
-    ctx.fillRect(w.x, w.holeY + w.holeHeight, w.width, w.y + w.height - (w.holeY + w.holeHeight));
+  level.walls.forEach(w=>{
+    // top section
+    ctx.fillRect(w.x, 0, w.width, w.holeY);
+    // bottom section
+    ctx.fillRect(w.x, w.holeY + w.holeHeight, w.width, canvas.height - (w.holeY + w.holeHeight));
   });
 
   // Finish
-  const f = level.finish;
   ctx.fillStyle = 'gold';
+  const f = level.finish;
   ctx.fillRect(f.x,f.y,f.width,f.height);
 }
 
@@ -179,12 +177,11 @@ function gameLoop(){
   player.x += player.dx;
   player.y += player.dy;
 
-  // Lava death
+  // Lava
   if(player.y + player.height > FLOOR_Y){
     resetPlayer();
   }
 
-  // Collisions
   handleCollisions(level);
 
   // Jump
@@ -197,13 +194,12 @@ function gameLoop(){
   if(rectsOverlap(player, level.finish)){
     currentLevel++;
     if(currentLevel >= levels.length){
-      alert('🎉 You Beat All 4 Levels!');
+      alert('🎉 You beat all 4 levels!');
       currentLevel = 0;
     }
     resetPlayer();
   }
 
-  // Draw everything
   drawLevel(level);
 
   // Player
