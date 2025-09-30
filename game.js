@@ -8,7 +8,6 @@ window.onload = function () {
   const GRAVITY = 0.5;
   const FLOOR_Y = canvas.height - 50;
 
-  // Player
   const player = {
     x: 0, y: 0,
     width: 30, height: 30,
@@ -21,23 +20,16 @@ window.onload = function () {
   document.addEventListener('keydown', e => keys[e.key] = true);
   document.addEventListener('keyup', e => keys[e.key] = false);
 
-  // Moving platform class
   class MovingPlatform {
     constructor(x, y, width, height, range, speed) {
-      this.x = x;
-      this.y = y;
-      this.startX = x;
-      this.width = width;
-      this.height = height;
-      this.range = range;
-      this.speed = speed;
-      this.direction = 1;
+      this.x = x; this.y = y;
+      this.startX = x; this.width = width;
+      this.height = height; this.range = range;
+      this.speed = speed; this.direction = 1;
     }
     update() {
       this.x += this.speed * this.direction;
-      if (this.x > this.startX + this.range || this.x < this.startX) {
-        this.direction *= -1;
-      }
+      if (this.x > this.startX + this.range || this.x < this.startX) this.direction *= -1;
     }
     draw() {
       ctx.fillStyle = '#00eaff';
@@ -45,15 +37,11 @@ window.onload = function () {
     }
   }
 
-  // Rolling Log class
   class Log {
     constructor(x, y, radius, speedX) {
-      this.x = x;
-      this.y = y;
-      this.radius = radius;
-      this.speedX = speedX;
-      this.dy = 0;
-      this.rotation = 0;
+      this.x = x; this.y = y;
+      this.radius = radius; this.speedX = speedX;
+      this.dy = 0; this.rotation = 0;
     }
     update() {
       this.dy += GRAVITY;
@@ -61,11 +49,18 @@ window.onload = function () {
       this.x += this.speedX;
       this.rotation += this.speedX / this.radius;
 
-      // ground collision (simple slope)
       const groundY = slopeGround(this.x);
       if (this.y + this.radius > groundY) {
         this.y = groundY - this.radius;
         this.dy = 0;
+      }
+
+      // Player collision
+      if (player.x + player.width > this.x - this.radius &&
+          player.x < this.x + this.radius &&
+          player.y + player.height > this.y - this.radius &&
+          player.y < this.y + this.radius) {
+        resetPlayer();
       }
     }
     draw() {
@@ -83,114 +78,27 @@ window.onload = function () {
   const logs = [];
   let logSpawnTimer = 0;
 
-  // Simple hill function for log levels
-  function slopeGround(x) {
-    return FLOOR_Y - (x / 4); // gentle downward slope
-  }
+  function slopeGround(x) { return FLOOR_Y - (x / 4); }
 
-  // LEVELS
   const levels = [
-    // Level 1
-    {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 20, width: 100, height: 20 },
-        { x: 220, y: FLOOR_Y - 80, width: 100, height: 20 },
-        { x: 400, y: FLOOR_Y - 140, width: 100, height: 20 }
-      ],
-      finish: { x: 600, y: FLOOR_Y - 180, width: 50, height: 10 },
-      movingPlatforms: [],
-      logLevel: false
-    },
-
-    // Level 2
-    {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 20, width: 100, height: 20 },
-        { x: 200, y: FLOOR_Y - 100, width: 100, height: 20 },
-        { x: 100, y: FLOOR_Y - 180, width: 100, height: 20 },
-        { x: 300, y: FLOOR_Y - 260, width: 100, height: 20 }
-      ],
-      finish: { x: 500, y: FLOOR_Y - 300, width: 50, height: 10 },
-      movingPlatforms: [],
-      logLevel: false
-    },
-
-    // Level 3
-    {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 20, width: 100, height: 20 },
-        { x: 250, y: FLOOR_Y - 40, width: 100, height: 20 },
-        { x: 450, y: FLOOR_Y - 60, width: 100, height: 20 },
-        { x: 650, y: FLOOR_Y - 80, width: 100, height: 20 }
-      ],
-      finish: { x: 700, y: FLOOR_Y - 120, width: 50, height: 10 },
-      movingPlatforms: [],
-      logLevel: false
-    },
-
-    // Level 4 — Moving platform challenge
-    {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 100, width: 100, height: 20 }
-      ],
-      movingPlatforms: [
-        new MovingPlatform(220, FLOOR_Y - 120, 100, 15, 150, 2.5)
-      ],
-      finish: { x: 450, y: FLOOR_Y - 160, width: 50, height: 10 },
-      logLevel: false
-    },
-
-    // Level 5 — Two moving platforms
-    {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 100, width: 100, height: 20 }
-      ],
-      movingPlatforms: [
-        new MovingPlatform(200, FLOOR_Y - 50, 100, 15, 150, 3),
-        new MovingPlatform(450, FLOOR_Y - 140, 100, 15, 120, 2.5)
-      ],
-      finish: { x: 700, y: FLOOR_Y - 180, width: 50, height: 10 },
-      logLevel: false
-    },
-
-    // Level 6 — Redesigned moving platform puzzle
-    {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 80, width: 100, height: 20 },
-        { x: 400, y: FLOOR_Y - 160, width: 100, height: 20 }
-      ],
-      movingPlatforms: [
-        new MovingPlatform(150, FLOOR_Y - 40, 100, 15, 200, 2.5),
-        new MovingPlatform(500, FLOOR_Y - 120, 100, 15, 150, 2.5)
-      ],
-      finish: { x: 700, y: FLOOR_Y - 180, width: 50, height: 10 },
-      logLevel: false
-    },
-
-    // Level 7 — Logs rolling down hill
-    {
-      platforms: [],
-      movingPlatforms: [],
-      finish: { x: 700, y: FLOOR_Y - 200, width: 50, height: 10 },
-      logLevel: true
-    },
-
-    // Level 8 — Logs + platforms
-    {
-      platforms: [
-        { x: 300, y: FLOOR_Y - 120, width: 100, height: 20 }
-      ],
-      movingPlatforms: [],
-      finish: { x: 700, y: FLOOR_Y - 200, width: 50, height: 10 },
-      logLevel: true
-    }
+    { platforms: [{ x: 50, y: FLOOR_Y - 20, width: 100, height: 20 }, { x: 220, y: FLOOR_Y - 80, width: 100, height: 20 }, { x: 400, y: FLOOR_Y - 140, width: 100, height: 20 }], finish: { x: 600, y: FLOOR_Y - 180, width: 50, height: 10 }, movingPlatforms: [], logLevel: false },
+    { platforms: [{ x: 50, y: FLOOR_Y - 20, width: 100, height: 20 }, { x: 200, y: FLOOR_Y - 100, width: 100, height: 20 }, { x: 100, y: FLOOR_Y - 180, width: 100, height: 20 }, { x: 300, y: FLOOR_Y - 260, width: 100, height: 20 }], finish: { x: 500, y: FLOOR_Y - 300, width: 50, height: 10 }, movingPlatforms: [], logLevel: false },
+    { platforms: [{ x: 50, y: FLOOR_Y - 20, width: 100, height: 20 }, { x: 250, y: FLOOR_Y - 40, width: 100, height: 20 }, { x: 450, y: FLOOR_Y - 60, width: 100, height: 20 }, { x: 650, y: FLOOR_Y - 80, width: 100, height: 20 }], finish: { x: 700, y: FLOOR_Y - 120, width: 50, height: 10 }, movingPlatforms: [], logLevel: false },
+    { platforms: [{ x: 50, y: FLOOR_Y - 100, width: 100, height: 20 }], movingPlatforms: [new MovingPlatform(220, FLOOR_Y - 120, 100, 15, 150, 2.5)], finish: { x: 450, y: FLOOR_Y - 160, width: 50, height: 10 }, logLevel: false },
+    { platforms: [{ x: 50, y: FLOOR_Y - 100, width: 100, height: 20 }], movingPlatforms: [new MovingPlatform(200, FLOOR_Y - 50, 100, 15, 150, 3), new MovingPlatform(450, FLOOR_Y - 140, 100, 15, 120, 2.5)], finish: { x: 700, y: FLOOR_Y - 180, width: 50, height: 10 }, logLevel: false },
+    { platforms: [{ x: 50, y: FLOOR_Y - 80, width: 100, height: 20 }], movingPlatforms: [new MovingPlatform(150, FLOOR_Y - 40, 100, 15, 200, 2.5), new MovingPlatform(500, FLOOR_Y - 120, 100, 15, 150, 2.5)], finish: { x: 700, y: FLOOR_Y - 180, width: 50, height: 10 }, logLevel: false },
+    { platforms: [], movingPlatforms: [], finish: { x: 700, y: FLOOR_Y - 200, width: 50, height: 10 }, logLevel: true },
+    { platforms: [{ x: 300, y: FLOOR_Y - 120, width: 100, height: 20 }], movingPlatforms: [], finish: { x: 700, y: FLOOR_Y - 200, width: 50, height: 10 }, logLevel: true }
   ];
 
   let currentLevel = 0;
 
   function resetPlayer() {
     const level = levels[currentLevel];
-    if (level.platforms.length > 0) {
+    if (level.logLevel) {
+      player.x = 50;
+      player.y = slopeGround(50) - player.height;
+    } else if (level.platforms.length > 0) {
       const p = level.platforms[0];
       player.x = p.x + 10;
       player.y = p.y - player.height;
@@ -198,8 +106,7 @@ window.onload = function () {
       player.x = 50;
       player.y = FLOOR_Y - player.height;
     }
-    player.dx = 0;
-    player.dy = 0;
+    player.dx = 0; player.dy = 0;
     logs.length = 0;
     logSpawnTimer = 0;
   }
@@ -221,41 +128,48 @@ window.onload = function () {
 
     const level = levels[currentLevel];
 
-    // Platform collisions
     for (const p of level.platforms) {
       if (player.x < p.x + p.width &&
           player.x + player.width > p.x &&
           player.y < p.y + p.height &&
           player.y + player.height > p.y) {
-        if (player.dy >= 0 && player.y + player.height - player.dy <= p.y) {
+        const prevBottom = player.y - player.dy + player.height;
+        const prevTop = player.y - player.dy;
+        if (prevBottom <= p.y && player.dy >= 0) {
           player.y = p.y - player.height;
           player.dy = 0;
           player.grounded = true;
+        } else if (prevTop >= p.y + p.height && player.dy < 0) {
+          player.y = p.y + p.height;
+          player.dy = 0;
         }
       }
     }
 
-    // Moving platform collisions
     for (const mp of level.movingPlatforms) {
       if (player.x < mp.x + mp.width &&
           player.x + player.width > mp.x &&
           player.y < mp.y + mp.height &&
           player.y + player.height > mp.y) {
-        if (player.dy >= 0 && player.y + player.height - player.dy <= mp.y) {
+        const prevBottom = player.y - player.dy + player.height;
+        const prevTop = player.y - player.dy;
+        if (prevBottom <= mp.y && player.dy >= 0) {
           player.y = mp.y - player.height;
           player.dy = 0;
           player.grounded = true;
           player.x += mp.speed * mp.direction;
+        } else if (prevTop >= mp.y + mp.height && player.dy < 0) {
+          player.y = mp.y + mp.height;
+          player.dy = 0;
         }
       }
     }
 
-    // Finish
-    const finish = level.finish;
-    if (player.x < finish.x + finish.width &&
-        player.x + player.width > finish.x &&
-        player.y < finish.y + finish.height &&
-        player.y + player.height > finish.y) {
+    const f = level.finish;
+    if (player.x < f.x + f.width &&
+        player.x + player.width > f.x &&
+        player.y < f.y + f.height &&
+        player.y + player.height > f.y) {
       currentLevel++;
       if (currentLevel >= levels.length) {
         alert('🎉 You beat all 8 levels!');
@@ -264,36 +178,30 @@ window.onload = function () {
       resetPlayer();
     }
 
-    // Fall off
     if (player.y > canvas.height + 100) resetPlayer();
   }
 
   function updateLogs() {
     logSpawnTimer++;
-    if (logSpawnTimer > 120) { // spawn every 2 seconds
+    if (logSpawnTimer > 120) {
       logs.push(new Log(50, -30, 15, 2));
       logSpawnTimer = 0;
     }
     logs.forEach(log => log.update());
-    // remove offscreen logs
     for (let i = logs.length - 1; i >= 0; i--) {
       if (logs[i].x > canvas.width + 50) logs.splice(i, 1);
     }
   }
 
   function updateMovingPlatforms() {
-    for (const mp of levels[currentLevel].movingPlatforms) {
-      mp.update();
-    }
+    for (const mp of levels[currentLevel].movingPlatforms) mp.update();
   }
 
   function drawLevel() {
     const level = levels[currentLevel];
-
     ctx.fillStyle = '#87CEEB';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw sloped ground for log levels
     if (level.logLevel) {
       ctx.fillStyle = '#228B22';
       ctx.beginPath();
@@ -305,37 +213,5 @@ window.onload = function () {
       ctx.fill();
     }
 
-    // Platforms
     ctx.fillStyle = '#228B22';
-    for (const p of level.platforms) {
-      ctx.fillRect(p.x, p.y, p.width, p.height);
-    }
-
-    // Moving platforms
-    for (const mp of level.movingPlatforms) {
-      mp.draw();
-    }
-
-    // Finish
-    ctx.fillStyle = 'gold';
-    ctx.fillRect(level.finish.x, level.finish.y, level.finish.width, level.finish.height);
-
-    // Logs
-    logs.forEach(log => log.draw());
-
-    // Player
-    ctx.fillStyle = 'white';
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-  }
-
-  function gameLoop() {
-    updatePlayer();
-    if (levels[currentLevel].logLevel) updateLogs();
-    updateMovingPlatforms();
-    drawLevel();
-    requestAnimationFrame(gameLoop);
-  }
-
-  resetPlayer();
-  gameLoop();
-};
+    for (const p of level.platforms) ctx.fillRect(p.x, p.y, p.width, p.height
