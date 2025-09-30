@@ -3,38 +3,83 @@ const ctx = canvas.getContext('2d');
 
 const FLOOR_Y = canvas.height - 40; // lava height
 
-// Levels with clean, intentional platform paths
+// Utility: simple collision check
+function rectsOverlap(a, b) {
+  return a.x < b.x + b.width && a.x + a.width > b.x &&
+         a.y < b.y + b.height && a.y + a.height > b.y;
+}
+
+// --- LEVELS ---
 const levels = [
+  // LEVEL 1: simple intro
   {
-    // Level 1: simple, clear path
+    platforms: [
+      {x: 50,  y: 350, width: 100, height: 10},   // start
+      {x: 300, y: 310, width: 100, height: 10},   // right
+      {x: 150, y: 260, width: 100, height: 10},   // left
+      {x: 350, y: 210, width: 100, height: 10},   // right
+    ],
+    walls: [],
+    finish: {x: 380, y: 170, width: 50, height: 10}
+  },
+
+  // LEVEL 2: staircase climbing
+  {
     platforms: [
       {x: 60,  y: 350, width: 100, height: 10},   // start
-      {x: 400, y: 310, width: 100, height: 10},   // jump right
-      {x: 180, y: 260, width: 100, height: 10},   // jump left
-      {x: 420, y: 210, width: 100, height: 10},   // jump right
-      {x: 250, y: 160, width: 100, height: 10},   // jump left
+      {x: 300, y: 310, width: 100, height: 10},   // step 1
+      {x: 120, y: 270, width: 100, height: 10},   // step 2
+      {x: 330, y: 230, width: 100, height: 10},   // step 3
+      {x: 150, y: 190, width: 100, height: 10},   // step 4
+      {x: 380, y: 150, width: 100, height: 10},   // step 5
     ],
-    finish: {x: 500, y: 120, width: 50, height: 10}
+    walls: [],
+    finish: {x: 400, y: 110, width: 50, height: 10}
   },
+
+  // LEVEL 3: staircase up then drop down behind wall
   {
-    // Level 2: trickier, more horizontal movement
     platforms: [
-      {x: 80,  y: 350, width: 100, height: 10},   // start
-      {x: 480, y: 310, width: 100, height: 10},   // far right
-      {x: 200, y: 270, width: 100, height: 10},   // left again
-      {x: 400, y: 230, width: 100, height: 10},   // right
-      {x: 150, y: 190, width: 100, height: 10},   // left
-      {x: 380, y: 150, width: 100, height: 10},   // right
+      {x: 70,  y: 350, width: 100, height: 10},   // start
+      {x: 300, y: 310, width: 100, height: 10},   // step 1
+      {x: 130, y: 270, width: 100, height: 10},   // step 2
+      {x: 340, y: 230, width: 100, height: 10},   // step 3
+      {x: 160, y: 190, width: 100, height: 10},   // step 4
+      {x: 400, y: 150, width: 100, height: 10},   // step 5
+
+      {x: 450, y: 350, width: 100, height: 10},   // landing after drop
+      {x: 550, y: 310, width: 100, height: 10},   // approach finish
     ],
-    finish: {x: 580, y: 110, width: 50, height: 10}
+    walls: [
+      {x: 500, y: 220, width: 30, height: 130, holeY: 280, holeHeight: 40} // wall with hole
+    ],
+    finish: {x: 600, y: 270, width: 50, height: 10}
+  },
+
+  // LEVEL 4: tricky wall navigation
+  {
+    platforms: [
+      {x: 60,  y: 350, width: 100, height: 10},   // start
+      {x: 300, y: 310, width: 100, height: 10},   // right
+      {x: 100, y: 270, width: 100, height: 10},   // left
+      {x: 400, y: 230, width: 100, height: 10},   // right
+      {x: 200, y: 190, width: 100, height: 10},   // left
+
+      {x: 550, y: 350, width: 100, height: 10},   // after wall
+      {x: 650, y: 310, width: 100, height: 10},   // near finish
+    ],
+    walls: [
+      {x: 500, y: 200, width: 40, height: 200, holeY: 320, holeHeight: 40}, // must go under hole
+    ],
+    finish: {x: 700, y: 270, width: 50, height: 10}
   }
 ];
 
 let currentLevel = 0;
-let player = {x: 60, y: 300, width: 30, height: 30, dx: 0, dy: 0, onGround: false};
+let player = {x: 70, y: 300, width: 30, height: 30, dx: 0, dy: 0, onGround: false};
 const keys = {left:false,right:false,up:false};
 
-// Keyboard input
+// --- INPUT ---
 document.addEventListener('keydown', e=>{
   if(e.key==='a' || e.key==='ArrowLeft') keys.left=true;
   if(e.key==='d' || e.key==='ArrowRight') keys.right=true;
@@ -46,6 +91,7 @@ document.addEventListener('keyup', e=>{
   if(e.key==='w' || e.key==='ArrowUp' || e.code==='Space') keys.up=false;
 });
 
+// --- FUNCTIONS ---
 function resetPlayer(){
   player.x = 70;
   player.y = 300;
@@ -53,33 +99,9 @@ function resetPlayer(){
   player.dy = 0;
 }
 
-function gameLoop(){
-  const level = levels[currentLevel];
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // Gravity
-  player.dy += 0.5;
-  if(player.dy > 10) player.dy = 10;
-  player.onGround = false;
-
-  // Horizontal movement
-  player.dx = 0;
-  if(keys.left) player.dx = -3;
-  if(keys.right) player.dx = 3;
-
-  player.x += player.dx;
-  player.y += player.dy;
-
-  // Floor Lava
-  ctx.fillStyle = 'orangered';
-  ctx.fillRect(0, FLOOR_Y, canvas.width, canvas.height - FLOOR_Y);
-
-  // Lava collision
-  if(player.y + player.height > FLOOR_Y){
-    resetPlayer();
-  }
-
+function handleCollisions(level){
   // Platform collisions
+  player.onGround = false;
   level.platforms.forEach(p => {
     if(player.x + player.width > p.x && player.x < p.x + p.width){
       if(player.y + player.height > p.y && player.y + player.height - player.dy <= p.y){
@@ -90,39 +112,101 @@ function gameLoop(){
     }
   });
 
-  // Jumping
+  // Wall collisions (solid parts only)
+  level.walls.forEach(w => {
+    // Top part of wall
+    let topRect = {x:w.x, y:w.y, width:w.width, height:w.holeY - w.y};
+    // Bottom part
+    let bottomRect = {x:w.x, y:w.holeY + w.holeHeight, width:w.width, height:w.y + w.height - (w.holeY + w.holeHeight)};
+
+    [topRect, bottomRect].forEach(part => {
+      if(rectsOverlap(player, part)){
+        // Push out horizontally (simplest)
+        if(player.x + player.width/2 < part.x + part.width/2){
+          player.x = part.x - player.width;
+        } else {
+          player.x = part.x + part.width;
+        }
+      }
+    });
+  });
+}
+
+function drawLevel(level){
+  // Lava
+  ctx.fillStyle = 'orangered';
+  ctx.fillRect(0, FLOOR_Y, canvas.width, canvas.height - FLOOR_Y);
+
+  // Pillars under platforms
+  ctx.fillStyle = '#5B3A1B';
+  level.platforms.forEach(p => {
+    ctx.fillRect(p.x + p.width/2 - 5, p.y, 10, FLOOR_Y - p.y);
+  });
+
+  // Platforms
+  ctx.fillStyle = 'green';
+  level.platforms.forEach(p => ctx.fillRect(p.x,p.y,p.width,p.height));
+
+  // Walls
+  ctx.fillStyle = 'gray';
+  level.walls.forEach(w => {
+    // top part
+    ctx.fillRect(w.x, w.y, w.width, w.holeY - w.y);
+    // bottom part
+    ctx.fillRect(w.x, w.holeY + w.holeHeight, w.width, w.y + w.height - (w.holeY + w.holeHeight));
+  });
+
+  // Finish
+  const f = level.finish;
+  ctx.fillStyle = 'gold';
+  ctx.fillRect(f.x,f.y,f.width,f.height);
+}
+
+// --- GAME LOOP ---
+function gameLoop(){
+  const level = levels[currentLevel];
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Gravity
+  player.dy += 0.5;
+  if(player.dy > 10) player.dy = 10;
+
+  // Movement
+  player.dx = 0;
+  if(keys.left) player.dx = -3;
+  if(keys.right) player.dx = 3;
+
+  player.x += player.dx;
+  player.y += player.dy;
+
+  // Lava death
+  if(player.y + player.height > FLOOR_Y){
+    resetPlayer();
+  }
+
+  // Collisions
+  handleCollisions(level);
+
+  // Jump
   if(keys.up && player.onGround){
     player.dy = -10;
     player.onGround = false;
   }
 
-  // Finish line
-  const f = level.finish;
-  if(player.x + player.width > f.x && player.x < f.x + f.width &&
-     player.y + player.height > f.y && player.y < f.y + f.height){
+  // Finish
+  if(rectsOverlap(player, level.finish)){
     currentLevel++;
     if(currentLevel >= levels.length){
-      alert('🎉 You Win All Levels!');
+      alert('🎉 You Beat All 4 Levels!');
       currentLevel = 0;
     }
     resetPlayer();
   }
 
-  // Pillars under platforms
-    ctx.fillStyle = '#5B3A1B';
-    level.platforms.forEach(p => {
-      ctx.fillRect(p.x + p.width/2 - 5, p.y, 10, FLOOR_Y - p.y);
-    });
+  // Draw everything
+  drawLevel(level);
 
-  // Draw platforms
-  ctx.fillStyle = 'green';
-  level.platforms.forEach(p => ctx.fillRect(p.x,p.y,p.width,p.height));
-
-  // Draw finish
-  ctx.fillStyle = 'gold';
-  ctx.fillRect(f.x,f.y,f.width,f.height);
-
-  // Draw player
+  // Player
   ctx.fillStyle = 'blue';
   ctx.fillRect(player.x,player.y,player.width,player.height);
 
