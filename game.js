@@ -1,216 +1,259 @@
 window.onload = function () {
-  // === GET CANVAS & CONTEXT ===
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
 
-  // Force usable size in case HTML doesn't set it
+  // Canvas size
   canvas.width = 800;
   canvas.height = 450;
 
-  const FLOOR_Y = canvas.height - 40;
+  // Gravity and floor
+  const GRAVITY = 0.5;
+  const FLOOR_Y = canvas.height - 50;
 
-  // === DEBUG TEST ===
-  ctx.fillStyle = 'red';
-  ctx.fillRect(0, 0, 100, 100);
-  console.log("✅ Canvas initialized");
-
-  // === LEVELS ===
-  const levels = [
-    // LEVEL 1 — simple steps
-    {
-      platforms: [
-        { x: 50, y: 360, width: 120, height: 10 },
-        { x: 200, y: 320, width: 100, height: 10 },
-        { x: 370, y: 280, width: 100, height: 10 },
-      ],
-      movingPlatforms: [],
-      finish: { x: 550, y: 240, width: 50, height: 10 },
-    },
-    // LEVEL 2 — zig-zag layout
-    {
-      platforms: [
-        { x: 50, y: 360, width: 120, height: 10 },
-        { x: 220, y: 300, width: 100, height: 10 },
-        { x: 400, y: 340, width: 100, height: 10 },
-        { x: 580, y: 280, width: 80, height: 10 },
-      ],
-      movingPlatforms: [],
-      finish: { x: 700, y: 240, width: 50, height: 10 },
-    },
-    // LEVEL 3 — tricky spacing
-    {
-      platforms: [
-        { x: 50, y: 360, width: 120, height: 10 },
-        { x: 260, y: 310, width: 80, height: 10 },
-        { x: 460, y: 270, width: 100, height: 10 },
-        { x: 640, y: 320, width: 80, height: 10 },
-      ],
-      movingPlatforms: [],
-      finish: { x: 740, y: 280, width: 50, height: 10 },
-    },
-    // LEVEL 4 — requires moving platform to finish
-    {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 100, width: 120, height: 10 },
-      ],
-      movingPlatforms: [
-        { x: 200, y: FLOOR_Y - 20, width: 100, height: 10, minX: 200, maxX: 500, dx: 2 },
-      ],
-      finish: { x: 600, y: FLOOR_Y - 20, width: 50, height: 10 },
-    },
-    // LEVEL 5 — mid-air jump required
-    {
-      platforms: [
-        { x: 50, y: FLOOR_Y - 100, width: 120, height: 10 },
-        { x: 350, y: FLOOR_Y - 150, width: 100, height: 10 },
-      ],
-      movingPlatforms: [
-        { x: 150, y: FLOOR_Y - 20, width: 100, height: 10, minX: 150, maxX: 550, dx: 2 },
-      ],
-      finish: { x: 600, y: FLOOR_Y - 150, width: 50, height: 10 },
-    },
-    // LEVEL 6 — timing challenge
-    {
-      platforms: [
-        { x: 300, y: FLOOR_Y - 100, width: 120, height: 10 },
-      ],
-      movingPlatforms: [
-        { x: 60, y: FLOOR_Y - 20, width: 100, height: 10, minX: 60, maxX: 540, dx: 2 },
-      ],
-      finish: { x: 560, y: FLOOR_Y - 20, width: 50, height: 10 },
-    },
-  ];
-
-  // === PLAYER ===
-  let currentLevel = 0;
+  // Player setup
   const player = {
-    x: 80,
-    y: 300,
+    x: 0,
+    y: 0,
     width: 30,
     height: 30,
     dx: 0,
     dy: 0,
-    onGround: false,
+    speed: 4,
+    jumpPower: 11,
+    grounded: false
   };
 
-  const keys = { left: false, right: false, up: false };
+  // Controls
+  const keys = {};
+  document.addEventListener('keydown', e => keys[e.key] = true);
+  document.addEventListener('keyup', e => keys[e.key] = false);
 
-  // === INPUT ===
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'a' || e.key === 'ArrowLeft') keys.left = true;
-    if (e.key === 'd' || e.key === 'ArrowRight') keys.right = true;
-    if (e.key === 'w' || e.key === 'ArrowUp' || e.code === 'Space') keys.up = true;
-  });
-  document.addEventListener('keyup', (e) => {
-    if (e.key === 'a' || e.key === 'ArrowLeft') keys.left = false;
-    if (e.key === 'd' || e.key === 'ArrowRight') keys.right = false;
-    if (e.key === 'w' || e.key === 'ArrowUp' || e.code === 'Space') keys.up = false;
-  });
+  // Moving platform structure
+    class MovingPlatform {
+      constructor(x, y, width, height, range, speed) {
+        this.x = x;
+        this.y = y;
+        this.startX = x;
+        this.width = width;
+        this.height = height;
+        this.range = range;
+        this.speed = speed;
+        this.direction = 1;
+      }
 
-  // === HELPER FUNCTIONS ===
+      update() {
+        this.x += this.speed * this.direction;
+        if (this.x > this.startX + this.range || this.x < this.startX) {
+          this.direction *= -1;
+        }
+      }
+
+      draw() {
+        ctx.fillStyle = '#00eaff';
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+      }
+    }
+
+  // Levels array
+  const levels = [
+    // LEVEL 1 — Simple 3-step platform
+    {
+      platforms: [
+        { x: 50, y: FLOOR_Y - 20, width: 100, height: 20 },
+        { x: 220, y: FLOOR_Y - 80, width: 100, height: 20 },
+        { x: 400, y: FLOOR_Y - 140, width: 100, height: 20 }
+      ],
+      finish: { x: 600, y: FLOOR_Y - 180, width: 50, height: 10 },
+      movingPlatforms: []
+    },
+
+    // LEVEL 2 — Zigzag jump
+    {
+      platforms: [
+        { x: 50, y: FLOOR_Y - 20, width: 100, height: 20 },
+        { x: 200, y: FLOOR_Y - 100, width: 100, height: 20 },
+        { x: 100, y: FLOOR_Y - 180, width: 100, height: 20 },
+        { x: 300, y: FLOOR_Y - 260, width: 100, height: 20 }
+      ],
+      finish: { x: 500, y: FLOOR_Y - 300, width: 50, height: 10 },
+      movingPlatforms: []
+    },
+
+    // LEVEL 3 — Long jump gaps
+    {
+      platforms: [
+        { x: 50, y: FLOOR_Y - 20, width: 100, height: 20 },
+        { x: 250, y: FLOOR_Y - 40, width: 100, height: 20 },
+        { x: 450, y: FLOOR_Y - 60, width: 100, height: 20 },
+        { x: 650, y: FLOOR_Y - 80, width: 100, height: 20 }
+      ],
+      finish: { x: 700, y: FLOOR_Y - 120, width: 50, height: 10 },
+      movingPlatforms: []
+    },
+
+    // LEVEL 4 — Single moving platform required
+    {
+      platforms: [
+        { x: 50, y: FLOOR_Y - 100, width: 100, height: 20 },
+        { x: 500, y: FLOOR_Y - 200, width: 100, height: 20 }
+      ],
+      movingPlatforms: [
+        new MovingPlatform(180, FLOOR_Y - 20, 100, 15, 150, 2.5)
+      ],
+      finish: { x: 650, y: FLOOR_Y - 220, width: 50, height: 10 }
+    },
+
+    // LEVEL 5 — Two moving platforms in sequence
+    {
+      platforms: [
+        { x: 50, y: FLOOR_Y - 100, width: 100, height: 20 },
+        { x: 600, y: FLOOR_Y - 180, width: 100, height: 20 }
+      ],
+      movingPlatforms: [
+        new MovingPlatform(200, FLOOR_Y - 30, 100, 15, 150, 3),
+        new MovingPlatform(400, FLOOR_Y - 120, 100, 15, 120, 2.5)
+      ],
+      finish: { x: 720, y: FLOOR_Y - 200, width: 50, height: 10 }
+    },
+
+    // LEVEL 6 — Jump off moving platform onto static and back
+    {
+      platforms: [
+        { x: 50, y: FLOOR_Y - 100, width: 100, height: 20 },
+        { x: 400, y: FLOOR_Y - 160, width: 100, height: 20 } // middle static platform
+      ],
+      movingPlatforms: [
+        new MovingPlatform(100, FLOOR_Y - 20, 100, 15, 500, 3)
+      ],
+      finish: { x: 700, y: FLOOR_Y - 180, width: 50, height: 10 }
+    }
+  ];
+
+  let currentLevel = 0;
+
   function resetPlayer() {
-    player.x = 80;
-    player.y = 300;
+    const level = levels[currentLevel];
+    const startPlatform = level.platforms[0];
+    player.x = startPlatform.x + 10;
+    player.y = startPlatform.y - player.height;
     player.dx = 0;
     player.dy = 0;
   }
 
-  function nextLevel() {
-    currentLevel++;
-    if (currentLevel >= levels.length) {
-      alert('🎉 You beat all 6 levels!');
-      currentLevel = 0;
+  function updatePlayer() {
+    // Horizontal movement
+    if (keys['ArrowLeft'] || keys['a']) player.dx = -player.speed;
+    else if (keys['ArrowRight'] || keys['d']) player.dx = player.speed;
+    else player.dx = 0;
+
+    // Jump
+    if ((keys['ArrowUp'] || keys[' '] || keys['w']) && player.grounded) {
+      player.dy = -player.jumpPower;
+      player.grounded = false;
     }
-    resetPlayer();
-  }
 
-  // === GAME LOOP ===
-  function gameLoop() {
-    const level = levels[currentLevel];
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Apply gravity
+    player.dy += GRAVITY;
 
-    // GRAVITY
-    player.dy += 0.5;
-    if (player.dy > 10) player.dy = 10;
-    player.onGround = false;
-
-    // HORIZONTAL INPUT
-    player.dx = 0;
-    if (keys.left) player.dx = -3;
-    if (keys.right) player.dx = 3;
-
+    // Move horizontally
     player.x += player.dx;
+
+    // Move vertically
     player.y += player.dy;
 
-    // LAVA FLOOR
-    ctx.fillStyle = 'orangered';
-    ctx.fillRect(0, FLOOR_Y, canvas.width, canvas.height - FLOOR_Y);
-    if (player.y + player.height > FLOOR_Y) resetPlayer();
+    const level = levels[currentLevel];
+    player.grounded = false;
 
-    // MOVE MOVING PLATFORMS
-    level.movingPlatforms.forEach((mp) => {
-      mp.x += mp.dx;
-      if (mp.x < mp.minX || mp.x + mp.width > mp.maxX) {
-        mp.dx *= -1;
-        mp.x += mp.dx;
-      }
-    });
+    // Collision with static platforms
+    for (const p of level.platforms) {
+      if (player.x < p.x + p.width &&
+          player.x + player.width > p.x &&
+          player.y < p.y + p.height &&
+          player.y + player.height > p.y) {
 
-    // COLLISIONS
-    const allPlatforms = [...level.platforms, ...level.movingPlatforms];
-    allPlatforms.forEach((p) => {
-      // LAND ON TOP
-      if (player.x + player.width > p.x && player.x < p.x + p.width) {
-        if (player.y + player.height > p.y && player.y + player.height - player.dy <= p.y) {
+        // Landing on top
+        if (player.dy >= 0 && player.y + player.height - player.dy <= p.y) {
           player.y = p.y - player.height;
           player.dy = 0;
-          player.onGround = true;
-          if (level.movingPlatforms.includes(p)) player.x += p.dx;
+          player.grounded = true;
         }
       }
-      // HEAD BUMP
-      if (player.x + player.width > p.x && player.x < p.x + p.width) {
-        if (player.y < p.y + p.height && player.y - player.dy >= p.y + p.height) {
-          player.y = p.y + p.height;
-          player.dy = 1;
+    }
+
+    // Collision with moving platforms
+    for (const mp of level.movingPlatforms) {
+      if (player.x < mp.x + mp.width &&
+          player.x + player.width > mp.x &&
+          player.y < mp.y + mp.height &&
+          player.y + player.height > mp.y) {
+
+        // Land on top
+        if (player.dy >= 0 && player.y + player.height - player.dy <= mp.y) {
+          player.y = mp.y - player.height;
+          player.dy = 0;
+          player.grounded = true;
+          // Stick to platform
+          player.x += mp.speed * mp.direction;
         }
       }
-    });
-
-    // JUMP
-    if (keys.up && player.onGround) {
-      player.dy = -10;
-      player.onGround = false;
     }
 
-    // FINISH COLLISION
-    const f = level.finish;
-    if (
-      player.x + player.width > f.x &&
-      player.x < f.x + f.width &&
-      player.y + player.height > f.y &&
-      player.y < f.y + f.height
-    ) {
-      nextLevel();
+    // Check finish
+    const finish = level.finish;
+    if (player.x < finish.x + finish.width &&
+        player.x + player.width > finish.x &&
+        player.y < finish.y + finish.height &&
+        player.y + player.height > finish.y) {
+      currentLevel++;
+      if (currentLevel >= levels.length) {
+        alert('You beat all the levels!');
+        currentLevel = 0;
+      }
+      resetPlayer();
     }
 
-    // DRAW
-    ctx.fillStyle = 'green';
-    level.platforms.forEach((p) => ctx.fillRect(p.x, p.y, p.width, p.height));
+    // Death by falling
+    if (player.y > canvas.height) {
+      resetPlayer();
+    }
+  }
 
-    ctx.fillStyle = 'cyan';
-    level.movingPlatforms.forEach((mp) => {
-      ctx.fillRect(mp.x, mp.y, mp.width, mp.height);
-      ctx.strokeStyle = 'lightblue';
-      ctx.strokeRect(mp.x - 2, mp.y - 2, mp.width + 4, mp.height + 4);
-    });
+  function updateMovingPlatforms() {
+    for (const mp of levels[currentLevel].movingPlatforms) {
+      mp.update();
+    }
+  }
 
+  function drawLevel() {
+    const level = levels[currentLevel];
+    // Background
+    ctx.fillStyle = '#222';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Platforms
+    ctx.fillStyle = '#888';
+    for (const p of level.platforms) {
+      ctx.fillRect(p.x, p.y, p.width, p.height);
+    }
+
+    // Moving platforms
+    for (const mp of level.movingPlatforms) {
+      mp.draw();
+    }
+
+    // Finish
     ctx.fillStyle = 'gold';
-    ctx.fillRect(f.x, f.y, f.width, f.height);
+    ctx.fillRect(level.finish.x, level.finish.y, level.finish.width, level.finish.height);
 
-    ctx.fillStyle = 'blue';
+    // Player
+    ctx.fillStyle = 'white';
     ctx.fillRect(player.x, player.y, player.width, player.height);
+  }
 
+  function gameLoop() {
+    updatePlayer();
+    updateMovingPlatforms();
+    drawLevel();
     requestAnimationFrame(gameLoop);
   }
 
