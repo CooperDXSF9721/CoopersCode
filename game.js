@@ -15,23 +15,26 @@ const levels = [
     movingPlatform: null,
     finish: {x: 400, y: 250, width: 50, height: 10}
   },
-  // LEVEL 2 — requires moving platform to reach finish
+  // LEVEL 2 — moving platform required to reach finish
   {
     platforms: [
-      {x: 60, y: 350, width: 120, height: 10},
-      {x: 480, y: 350, width: 100, height: 10}, // finish platform is unreachable from normal jump
+      {x: 60, y: 350, width: 120, height: 10}, // starting platform
     ],
     movingPlatform: {
-      x: 250,
+      x: 180, // start closer to player
       y: 250,
       width: 100,
       height: 10,
-      minX: 250,
-      maxX: 480,
+      minX: 180,
+      maxX: 450,
       speed: 2,
-      dx: 2
+      dx: 2,
+      baseY: 250,       // for bobbing
+      bobAmplitude: 10, // pixels to move up/down
+      bobSpeed: 0.05,   // how fast it bobs
+      bobAngle: 0       // current angle for sine
     },
-    finish: {x: 480, y: 250, width: 50, height: 10}
+    finish: {x: 450, y: 250, width: 50, height: 10} // finish only reachable via moving platform
   }
 ];
 
@@ -101,6 +104,7 @@ function gameLoop() {
         // Move player with moving platform
         if (level.movingPlatform && p === level.movingPlatform) {
           player.x += level.movingPlatform.dx;
+          player.y += level.movingPlatform.bobAmplitude * Math.sin(level.movingPlatform.bobAngle) - (p.y - level.movingPlatform.y); // adjust for bob
         }
       }
     }
@@ -122,23 +126,26 @@ function gameLoop() {
   // ===== MOVING PLATFORM LOGIC =====
   if (level.movingPlatform) {
     const mp = level.movingPlatform;
+    // Horizontal movement
     mp.x += mp.dx;
     if (mp.x < mp.minX || mp.x + mp.width > mp.maxX) {
-      mp.dx *= -1; // reverse direction
+      mp.dx *= -1;
       mp.x += mp.dx; // prevent overshoot
     }
+    // Vertical bobbing
+    mp.bobAngle += mp.bobSpeed;
+    mp.y = mp.baseY + mp.bobAmplitude * Math.sin(mp.bobAngle);
   }
 
   // ===== DRAW PLATFORMS =====
   ctx.fillStyle = 'green';
   level.platforms.forEach(p => ctx.fillRect(p.x, p.y, p.width, p.height));
 
-  // Draw moving platform with a floating/gravitational style
+  // Draw moving platform with floating effect
   if (level.movingPlatform) {
     const mp = level.movingPlatform;
     ctx.fillStyle = 'cyan';
     ctx.fillRect(mp.x, mp.y, mp.width, mp.height);
-    // Add glowing aura effect
     ctx.strokeStyle = 'lightblue';
     ctx.lineWidth = 2;
     ctx.strokeRect(mp.x - 2, mp.y - 2, mp.width + 4, mp.height + 4);
